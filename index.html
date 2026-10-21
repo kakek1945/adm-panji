@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Portal Instrumen Penilaian - Panji Hidayat, M.Pd (SMPN 3 Merbau)</title>
+  <title>Portal Instrumen Penilaian - Panji Hidayat (SMPN 3 Merbau)</title>
 
   <!-- PWA Manifest Single-File Data URI -->
   <link rel="manifest" href='data:application/manifest+json,{"name":"Portal Guru Panji","short_name":"PortalGuru","start_url":".","display":"standalone","background_color":"#FAF9F6","theme_color":"#111827","icons":[{"src":"https://placehold.co/192x192/111827/FFFFFF?text=PH","sizes":"192x192","type":"image/png"}]}' />
@@ -155,7 +155,7 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <button id="top-manage-btn" onclick="window.app.handleTopManageClick()" class="hidden p-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold transition-all" title="Atur Link & Waktu">
+          <button id="top-manage-btn" onclick="window.app.handleTopManageClick()" class="hidden p-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold transition-all" title="Atur Massal & Waktu Buka">
             <i data-lucide="clock" class="w-4 h-4"></i>
           </button>
           <button id="btn-auth-action" onclick="window.app.handleAuthClick()" class="px-3 py-1.5 rounded-xl bg-slate-900 text-white text-[11px] font-extrabold shadow-sm">
@@ -180,7 +180,7 @@
                 <img
                   id="teacher-profile-photo"
                   src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300"
-                  alt="Panji Hidayat, M.Pd"
+                  alt="Panji Hidayat"
                   class="w-full h-full object-cover rounded-full"
                   onerror="this.src='https://placehold.co/200x200/111827/FFFFFF?text=Panji'"
                 />
@@ -201,10 +201,10 @@
             </div>
 
             <h2 id="header-teacher-name" class="text-base font-extrabold text-slate-900 tracking-tight leading-snug">
-              Panji Hidayat, M.Pd
+              Panji Hidayat
             </h2>
             <p id="header-teacher-role" class="text-xs font-bold text-blue-600 mt-0.5">
-              Guru Mata Pelajaran • SMP Negeri 3 Merbau
+              Guru Informatika • SMP Negeri 3 Merbau
             </p>
 
             <!-- Quick Action: Diskusi Admin (WhatsApp) -->
@@ -295,16 +295,28 @@
           </div>
         </section>
 
-        <!-- VIEW 3: MANAGE DRIVE LINKS & TIME-LOCK (Admin Only) -->
+        <!-- VIEW 3: MANAGE DRIVE LINKS & BULK TIME-LOCK (Admin Only) -->
         <section id="view-manage" class="hidden space-y-4">
-          <div class="pin-card p-4">
+          <div class="pin-card p-4 space-y-4">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Kelola Tautan & Waktu Buka</h3>
+              <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Pengaturan Waktu & Jadwal Massal</h3>
               <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700">Admin Mode</span>
             </div>
-            <p class="text-[11px] text-slate-500 mt-2">Atur URL Google Drive dan waktu buka akses (Schedule) bagi setiap instrumen.</p>
+            
+            <!-- Pengaturan Jadwal Buka Massal -->
+            <div class="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200/60 space-y-2 text-xs">
+              <label class="block font-bold text-amber-900">Jadwal Buka Akses Massal (Semua Instrumen)</label>
+              <p class="text-[10px] text-stone-600">Atur satu waktu buka akses yang akan berlaku serentak untuk seluruh 29 instrumen.</p>
+              <div class="flex items-center gap-2 pt-1">
+                <input type="datetime-local" id="bulk-open-time" class="w-full px-3 py-2 rounded-xl bg-white border border-amber-300 font-medium text-xs" />
+                <button onclick="window.app.applyBulkTime()" class="px-4 py-2 rounded-xl bg-amber-700 text-white font-bold text-xs whitespace-nowrap shadow-sm hover:bg-amber-800 transition">Terapkan Massal</button>
+              </div>
+            </div>
 
-            <div class="mt-4 space-y-3" id="manage-links-container"></div>
+            <div class="pt-2">
+              <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-3">Kelola Tautan Google Drive Per Item</h4>
+              <div class="space-y-3" id="manage-links-container"></div>
+            </div>
           </div>
         </section>
 
@@ -316,6 +328,10 @@
               <div>
                 <label class="block font-bold text-slate-600 mb-1">Nama Guru & Gelar</label>
                 <input type="text" id="set-teacher-name" required class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-medium" />
+              </div>
+              <div>
+                <label class="block font-bold text-slate-600 mb-1">Jabatan / Instansi</label>
+                <input type="text" id="set-teacher-role-input" required class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-medium" />
               </div>
               <div>
                 <label class="block font-bold text-slate-600 mb-1">Nama Sekolah / Instansi</label>
@@ -363,7 +379,7 @@
     </div>
   </div>
 
-  <!-- MODAL EDIT SINGLE LINK & TIME-LOCK -->
+  <!-- MODAL EDIT SINGLE LINK (Admin) -->
   <div id="modal-edit-link" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
@@ -427,7 +443,7 @@
     // KONFIGURASI FIREBASE ANDA
     // -------------------------------------------------------------------------
     const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-  apiKey: "AIzaSyBwPUft7vLimwrZ9IigxhDdqDzRA6qgpBA",
+     apiKey: "AIzaSyBwPUft7vLimwrZ9IigxhDdqDzRA6qgpBA",
   authDomain: "adm-panji.firebaseapp.com",
   projectId: "adm-panji",
   storageBucket: "adm-panji.firebasestorage.app",
@@ -487,7 +503,8 @@
       searchQuery: '',
       isAdminLoggedIn: false,
       portalConfig: {
-        teacherName: "Panji Hidayat, M.Pd",
+        teacherName: "Panji Hidayat",
+        teacherRole: "Guru Informatika • SMP Negeri 3 Merbau",
         schoolName: "SMP Negeri 3 Merbau",
         photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300",
         logoUrl: "https://i.ibb.co.com/fVTzR5H6/logo.png",
@@ -596,7 +613,7 @@
     function renderAll() {
       document.getElementById('header-teacher-name').textContent = state.portalConfig.teacherName;
       document.getElementById('header-school-subtitle').textContent = state.portalConfig.schoolName;
-      document.getElementById('header-teacher-role').textContent = `Guru Mata Pelajaran • ${state.portalConfig.schoolName}`;
+      document.getElementById('header-teacher-role').textContent = state.portalConfig.teacherRole || `Guru Informatika • ${state.portalConfig.schoolName}`;
       
       const logoImg = document.getElementById('header-logo-img');
       if (state.portalConfig.logoUrl) {
@@ -614,6 +631,7 @@
       }
 
       document.getElementById('set-teacher-name').value = state.portalConfig.teacherName;
+      document.getElementById('set-teacher-role-input').value = state.portalConfig.teacherRole || "Guru Informatika • SMP Negeri 3 Merbau";
       document.getElementById('set-school-name').value = state.portalConfig.schoolName;
       document.getElementById('set-photo-url').value = state.portalConfig.photoUrl;
       document.getElementById('set-logo-url').value = state.portalConfig.logoUrl;
@@ -694,7 +712,6 @@
         const hasLink = Boolean(item.driveUrl && item.driveUrl.trim() !== '');
         const accessible = isLinkAccessible(item);
         
-        // Format preview link sebagian jika terkunci waktu
         let urlDisplay = '';
         if (hasLink) {
           if (accessible) {
@@ -768,7 +785,7 @@
           showToast(`Membuka "${item.title}"...`, 'success');
           window.open(item.driveUrl.trim(), '_blank');
         } else {
-          showToast(`Akses belum diizinkan oleh admin! Baru dapat dibuka pada ${formatTimeLabel(item.openTime)}.`, 'error');
+          showToast(`Akses belum diizinkan oleh admin! Link belum dapat dilihat (Dibuka pada ${formatTimeLabel(item.openTime)}).`, 'error');
         }
       }, 420);
     }
@@ -893,6 +910,23 @@
         renderGrid();
       },
       shakeAndOpen,
+      async applyBulkTime() {
+        if (!state.isAdminLoggedIn) {
+          showToast("Akses ditolak.", "error");
+          return;
+        }
+        const bulkTime = document.getElementById('bulk-open-time').value;
+        if (!bulkTime) {
+          showToast("Pilih waktu buka massal terlebih dahulu.", "warning");
+          return;
+        }
+        state.instruments.forEach(item => {
+          item.openTime = bulkTime;
+        });
+        await saveToFirestore();
+        renderAll();
+        showToast("Jadwal buka akses massal berhasil diterapkan untuk semua instrumen!", "success");
+      },
       async submitSingleLink(e) {
         e.preventDefault();
         if (!state.isAdminLoggedIn) {
@@ -936,6 +970,7 @@
           return;
         }
         state.portalConfig.teacherName = document.getElementById('set-teacher-name').value;
+        state.portalConfig.teacherRole = document.getElementById('set-teacher-role-input').value;
         state.portalConfig.schoolName = document.getElementById('set-school-name').value;
         state.portalConfig.photoUrl = document.getElementById('set-photo-url').value.trim();
         state.portalConfig.logoUrl = document.getElementById('set-logo-url').value.trim();
