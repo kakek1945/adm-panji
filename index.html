@@ -37,7 +37,7 @@
       padding: 0 !important;
       width: 100% !important;
       min-height: 100vh !important;
-      background-color: #0f172a; /* Dark sleek backdrop for vertical frame */
+      background-color: #0f172a;
       font-family: 'Plus Jakarta Sans', sans-serif;
       color: #111827;
       overflow-x: hidden;
@@ -91,7 +91,7 @@
       overflow-y: auto;
       overflow-x: hidden;
       padding: 16px;
-      padding-bottom: 96px; /* Space for bottom nav */
+      padding-bottom: 96px;
     }
 
     .pin-card {
@@ -109,8 +109,8 @@
       0%, 100% { transform: translateX(0) scale(1); }
       15% { transform: translateX(-6px) rotate(-1.5deg) scale(0.98); }
       30% { transform: translateX(6px) rotate(1.5deg) scale(1.02); }
-      45% { transform: translateX(-5px) rotate(-1deg) scale(0.99); }
-      60% { transform: translateX(5px) rotate(1deg) scale(1.01); }
+      45% { transform: translateX(-5px) rotate(-1.0deg) scale(0.99); }
+      60% { transform: translateX(5px) rotate(1.0deg) scale(1.01); }
       75% { transform: translateX(-2px) rotate(-0.5deg); }
       90% { transform: translateX(2px) rotate(0.5deg); }
     }
@@ -147,7 +147,7 @@
       <!-- TOP STATUS BAR / HEADER -->
       <div class="px-5 pt-3 pb-2.5 bg-white border-b border-slate-100 flex items-center justify-between z-20 shrink-0">
         <div class="flex items-center gap-2.5">
-          <img id="header-logo-img" src="https://i.ibb.co/fVTzR5H6/logo.png" alt="Logo" class="w-8 h-8 rounded-xl object-cover shadow-sm border border-slate-200" onerror="this.src='https://placehold.co/100x100/111827/FFFFFF?text=SMP3'" />
+          <img id="header-logo-img" src="https://i.ibb.co.com/fVTzR5H6/logo.png" alt="Logo" class="w-8 h-8 rounded-xl object-cover shadow-sm border border-slate-200" onerror="this.src='https://placehold.co/100x100/111827/FFFFFF?text=SMP3'" />
           <div>
             <h1 class="text-xs font-extrabold text-slate-900 leading-tight">Portal Instrumen</h1>
             <p id="header-school-subtitle" class="text-[10px] text-slate-500 font-bold">SMP Negeri 3 Merbau</p>
@@ -155,21 +155,22 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <button onclick="window.app.switchTab('manage')" class="p-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold transition-all" title="Atur Link">
+          <button id="top-manage-btn" onclick="window.app.handleTopManageClick()" class="hidden p-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold transition-all" title="Atur Link">
             <i data-lucide="link" class="w-4 h-4"></i>
           </button>
-          <button onclick="window.app.openLoginModal()" class="px-3 py-1.5 rounded-xl bg-slate-900 text-white text-[11px] font-extrabold shadow-sm">
-            Masuk
+          <button id="btn-auth-action" onclick="window.app.handleAuthClick()" class="px-3 py-1.5 rounded-xl bg-slate-900 text-white text-[11px] font-extrabold shadow-sm">
+            Masuk Admin
           </button>
         </div>
       </div>
 
+      <!-- SCROLLABLE BODY -->
       <div class="phone-scroll-body space-y-4" id="phone-main-scroll">
         
         <!-- PREVIEW BANNER -->
         <div id="preview-banner-container"></div>
 
-        <!-- VIEW 1: MICROSITE LIST (INSTRUMEN) -->
+        <!-- VIEW 1: MICROSITE LIST (INSTRUMEN 1-29) -->
         <section id="view-microsite" class="space-y-4">
           
           <!-- HERO CARD DENGAN FOTO DI TENGAH -->
@@ -181,15 +182,16 @@
               <div class="w-24 h-24 rounded-full p-1 bg-white shadow-md border-2 border-slate-200 overflow-hidden mx-auto">
                 <img
                   id="teacher-profile-photo"
-                  src="https://placehold.co/200x200/111827/FFFFFF?text=Panji"
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300"
                   alt="Panji Hidayat, M.Pd"
                   class="w-full h-full object-cover rounded-full"
-                  onerror="this.src='https://placehold.co/200x200/111827/FFFFFF?text=Foto'"
+                  onerror="this.src='https://placehold.co/200x200/111827/FFFFFF?text=Panji'"
                 />
               </div>
               <button
+                id="hero-camera-btn"
                 onclick="window.app.openSettingsTab()"
-                class="absolute bottom-0 right-0 p-1.5 rounded-full bg-slate-900 text-white shadow hover:bg-blue-600 transition-colors"
+                class="hidden absolute bottom-0 right-0 p-1.5 rounded-full bg-slate-900 text-white shadow hover:bg-blue-600 transition-colors"
                 title="Ubah Foto Profil"
               >
                 <i data-lucide="camera" class="w-3.5 h-3.5"></i>
@@ -266,7 +268,7 @@
             </div>
           </div>
 
-          <!-- INSTRUMENTS STACK (Vertical 9:16 Feed) -->
+          <!-- INSTRUMENTS STACK (Vertical 1-29 Feed) -->
           <div id="instruments-grid" class="space-y-3"></div>
         </section>
 
@@ -296,12 +298,12 @@
           </div>
         </section>
 
-        <!-- VIEW 3: MANAGE DRIVE LINKS -->
+        <!-- VIEW 3: MANAGE DRIVE LINKS (Admin Only) -->
         <section id="view-manage" class="hidden space-y-4">
           <div class="pin-card p-4">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Kelola Link Google Drive</h3>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700">Aktif</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700">Admin Mode</span>
             </div>
             <p class="text-[11px] text-slate-500 mt-2">Masukkan URL Google Drive pada masing-masing nomor instrumen di bawah ini.</p>
 
@@ -309,10 +311,10 @@
           </div>
         </section>
 
-        <!-- VIEW 4: SETTINGS & PROFILE -->
+        <!-- VIEW 4: SETTINGS & PROFILE (Admin Only) -->
         <section id="view-settings" class="hidden space-y-4">
           <div class="pin-card p-4 space-y-3">
-            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Pengaturan Identitas & Profil</h3>
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Pengaturan Identitas & Profil (Admin)</h3>
             <form onsubmit="window.app.savePortalSettings(event)" class="space-y-2.5 text-xs">
               <div>
                 <label class="block font-bold text-slate-600 mb-1">Nama Guru & Gelar</label>
@@ -334,13 +336,14 @@
                 <label class="block font-bold text-slate-600 mb-1">Nomor WhatsApp Diskusi Admin</label>
                 <input type="text" id="set-wa-number" placeholder="628123456789" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-medium" />
               </div>
-              <button type="submit" class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-bold shadow-sm">Simpan Perubahan</button>
+              <button type="submit" class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-bold shadow-sm">Simpan Perubahan Profil</button>
             </form>
           </div>
         </section>
 
       </div>
 
+      <!-- BOTTOM NAVIGATION BAR -->
       <nav class="glass-nav absolute bottom-0 left-0 right-0 h-16 flex items-center justify-around px-2 z-30">
         <button onclick="window.app.switchTab('microsite')" id="nav-btn-microsite" class="flex flex-col items-center justify-center p-2 text-slate-900 font-bold transition-all">
           <i data-lucide="grid" class="w-5 h-5"></i>
@@ -350,25 +353,25 @@
           <i data-lucide="pie-chart" class="w-5 h-5"></i>
           <span class="text-[9px] mt-0.5">Kesiapan</span>
         </button>
-        <button onclick="window.app.switchTab('manage')" id="nav-btn-manage" class="flex flex-col items-center justify-center p-2 text-slate-400 font-semibold transition-all">
+        <button id="nav-btn-manage" onclick="window.app.handleNavManageClick()" class="flex flex-col items-center justify-center p-2 text-slate-400 font-semibold transition-all">
           <i data-lucide="link-2" class="w-5 h-5"></i>
-          <span class="text-[9px] mt-0.5">Link Drive</span>
+          <span id="nav-label-manage" class="text-[9px] mt-0.5">Link Drive</span>
         </button>
-        <button onclick="window.app.switchTab('settings')" id="nav-btn-settings" class="flex flex-col items-center justify-center p-2 text-slate-400 font-semibold transition-all">
+        <button id="nav-btn-settings" onclick="window.app.handleNavSettingsClick()" class="flex flex-col items-center justify-center p-2 text-slate-400 font-semibold transition-all">
           <i data-lucide="settings" class="w-5 h-5"></i>
-          <span class="text-[9px] mt-0.5">Profil</span>
+          <span id="nav-label-settings" class="text-[9px] mt-0.5">Profil</span>
         </button>
       </nav>
 
     </div>
   </div>
 
-  <!-- MODAL EDIT LINK -->
+  <!-- MODAL EDIT SINGLE LINK -->
   <div id="modal-edit-link" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
         <span id="modal-edit-no" class="px-2.5 py-1 rounded-xl bg-slate-900 text-white font-extrabold text-xs">#1</span>
-        <button onclick="window.app.closeEditModal()" class="text-slate-400 hover:text-slate-600">
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -386,39 +389,66 @@
     </div>
   </div>
 
-  <!-- MODAL LOGIN -->
+  <!-- MODAL LOGIN ADMIN -->
   <div id="modal-login" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <h4 class="font-extrabold text-slate-900 text-sm">Masuk Portal Guru</h4>
-        <button onclick="window.app.closeLoginModal()" class="text-slate-400">
+        <h4 class="font-extrabold text-slate-900 text-sm">Autentikasi Admin</h4>
+        <button onclick="closeLoginModal()" class="text-slate-400 hover:text-slate-600">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
-      <div id="login-preview-hint" class="text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded-xl"></div>
+      <p class="text-[11px] text-slate-500">Masukkan kredensial admin untuk dapat mengubah link Google Drive dan identitas portal.</p>
       <form onsubmit="window.app.handleLogin(event)" class="space-y-3 text-xs">
         <div>
-          <label class="block font-bold mb-1">Username</label>
-          <input type="text" id="login-username" required value="panji" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200" />
+          <label class="block font-bold mb-1">Username / ID</label>
+          <input type="text" id="login-username" required placeholder="admin" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200" />
         </div>
         <div>
           <label class="block font-bold mb-1">Password</label>
-          <input type="password" id="login-password" required value="123" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200" />
+          <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200" />
         </div>
-        <button type="submit" class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-bold">Masuk Sekarang</button>
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-bold">Masuk Sebagai Admin</button>
       </form>
+      <div class="text-[10px] text-slate-400 text-center bg-slate-50 p-2 rounded-xl">
+        Demo Login: <code class="font-bold text-slate-700">admin</code> / <code class="font-bold text-slate-700">merbau2026</code>
+      </div>
     </div>
   </div>
 
   <!-- TOAST CONTAINER -->
   <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100000] flex flex-col gap-2 max-w-xs w-full pointer-events-none px-4"></div>
 
+  <!-- FIREBASE SDK & CONFIGURATION SCRIPT -->
   <script type="module">
-    const IS_PREVIEW = true;
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // -------------------------------------------------------------------------
+    // TEMPAT PENGISIAN KONFIGURASI FIREBASE API KEY ANDA (Opsional untuk Cloud)
+    // -------------------------------------------------------------------------
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+   apiKey: "AIzaSyBwPUft7vLimwrZ9IigxhDdqDzRA6qgpBA",
+  authDomain: "adm-panji.firebaseapp.com",
+  projectId: "adm-panji",
+  storageBucket: "adm-panji.firebasestorage.app",
+  messagingSenderId: "733622558355",
+  appId: "1:733622558355:web:e87736a24e5190ed15b766"
+    };
+
+    let db, auth;
+    try {
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      auth = getAuth(app);
+    } catch(e) {
+      console.log("Firebase initialized in local fallback mode.");
+    }
 
     const BASE_INSTRUMENTS_CATALOG = [
-      { no: 1,  category: "Perencanaan Waktu",     title: "Program Tahunan", driveUrl: "https://drive.google.com/drive/u/0/my-drive" },
-      { no: 2,  category: "Perencanaan Waktu",     title: "Program Semester", driveUrl: "https://drive.google.com/drive/u/0/my-drive" },
+      { no: 1,  category: "Perencanaan Waktu",     title: "Program Tahunan", driveUrl: "" },
+      { no: 2,  category: "Perencanaan Waktu",     title: "Program Semester", driveUrl: "" },
       { no: 3,  category: "Perencanaan Waktu",     title: "Kalender Pendidikan", driveUrl: "" },
       { no: 4,  category: "Perencanaan Waktu",     title: "Analisis Minggu Efektif", driveUrl: "" },
       { no: 5,  category: "Perencanaan Waktu",     title: "Analisis Hari Efektif", driveUrl: "" },
@@ -452,12 +482,12 @@
       currentTab: 'microsite',
       selectedCategory: 'ALL',
       searchQuery: '',
-      currentUser: null,
+      isAdminLoggedIn: false,
       portalConfig: {
         teacherName: "Panji Hidayat, M.Pd",
         schoolName: "SMP Negeri 3 Merbau",
-        photoUrl: "",
-        logoUrl: "https://i.ibb.co/fVTzR5H6/logo.png",
+        photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300",
+        logoUrl: "https://i.ibb.co.com/fVTzR5H6/logo.png",
         whatsappNumber: "6281234567890"
       },
       instruments: []
@@ -479,20 +509,62 @@
       setTimeout(() => toast.remove(), 3000);
     }
 
+    window.openLoginModal = function() {
+      const modal = document.getElementById('modal-login');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    window.closeLoginModal = function() {
+      const modal = document.getElementById('modal-login');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    window.openEditModal = function(no) {
+      if (!state.isAdminLoggedIn) {
+        showToast("Akses ditolak. Silakan login sebagai Admin terlebih dahulu.", "error");
+        window.openLoginModal();
+        return;
+      }
+      const item = state.instruments.find(i => i.no === no);
+      if (!item) return;
+      document.getElementById('modal-instrument-no').value = no;
+      document.getElementById('modal-edit-no').textContent = `#${no}`;
+      document.getElementById('modal-instrument-title').textContent = item.title;
+      document.getElementById('modal-instrument-url').value = item.driveUrl || '';
+      document.getElementById('modal-edit-link').classList.remove('hidden');
+    }
+
+    window.closeEditModal = function() {
+      document.getElementById('modal-edit-link').classList.add('hidden');
+    }
+
     function initApp() {
-      state.instruments = BASE_INSTRUMENTS_CATALOG.map(i => ({ ...i }));
+      const savedInstruments = localStorage.getItem('smpn3_admin_instruments');
+      if (savedInstruments) {
+        try { state.instruments = JSON.parse(savedInstruments); }
+        catch(e) { state.instruments = BASE_INSTRUMENTS_CATALOG.map(i => ({ ...i })); }
+      } else {
+        state.instruments = BASE_INSTRUMENTS_CATALOG.map(i => ({ ...i }));
+      }
+
+      const savedConfig = localStorage.getItem('smpn3_admin_config');
+      if (savedConfig) {
+        try { state.portalConfig = JSON.parse(savedConfig); } catch(e) {}
+      }
+
+      const sessionAdmin = sessionStorage.getItem('smpn3_is_admin');
+      if (sessionAdmin === 'true') {
+        state.isAdminLoggedIn = true;
+      }
+
       renderBanner();
       renderAll();
     }
 
     function renderBanner() {
       const banner = document.getElementById('preview-banner-container');
-      const hint = document.getElementById('login-preview-hint');
       if (banner) {
-        banner.innerHTML = `<div class="bg-slate-900 text-white text-[10px] font-bold py-1.5 px-3 rounded-xl text-center">📱 Format 9:16 Mobile View • Demo: <u>panji</u> / <u>123</u></div>`;
-      }
-      if (hint) {
-        hint.innerHTML = `Demo Login: Username <code class="font-bold">panji</code> | Password <code class="font-bold">123</code>`;
+        banner.innerHTML = `<div class="bg-slate-900 text-white text-[10px] font-bold py-1.5 px-3 rounded-xl text-center">📱 Format 9:16 Mobile View • Mode Admin: <u>admin</u> / <u>merbau2026</u></div>`;
       }
     }
 
@@ -516,12 +588,33 @@
         waBtn.href = `https://wa.me/${state.portalConfig.whatsappNumber}?text=Halo%20Admin,%20saya%20ingin%20berdiskusi%20mengenai%20Portal%20Administrasi%20Pembelajaran%20${encodeURIComponent(state.portalConfig.schoolName)}.`;
       }
 
-      // Populate settings form inputs
       document.getElementById('set-teacher-name').value = state.portalConfig.teacherName;
       document.getElementById('set-school-name').value = state.portalConfig.schoolName;
       document.getElementById('set-photo-url').value = state.portalConfig.photoUrl;
       document.getElementById('set-logo-url').value = state.portalConfig.logoUrl;
       document.getElementById('set-wa-number').value = state.portalConfig.whatsappNumber;
+
+      const topManageBtn = document.getElementById('top-manage-btn');
+      const heroCameraBtn = document.getElementById('hero-camera-btn');
+      const authBtn = document.getElementById('btn-auth-action');
+      const navManageLabel = document.getElementById('nav-label-manage');
+      const navSettingsLabel = document.getElementById('nav-label-settings');
+
+      if (state.isAdminLoggedIn) {
+        topManageBtn.classList.remove('hidden');
+        heroCameraBtn.classList.remove('hidden');
+        authBtn.textContent = "Keluar";
+        authBtn.className = "px-3 py-1.5 rounded-xl bg-rose-600 text-white text-[11px] font-extrabold shadow-sm";
+        navManageLabel.textContent = "Kelola Link";
+        navSettingsLabel.textContent = "Profil";
+      } else {
+        topManageBtn.classList.add('hidden');
+        heroCameraBtn.classList.add('hidden');
+        authBtn.textContent = "Masuk Admin";
+        authBtn.className = "px-3 py-1.5 rounded-xl bg-slate-900 text-white text-[11px] font-extrabold shadow-sm";
+        navManageLabel.textContent = "Atur Link";
+        navSettingsLabel.textContent = "Login";
+      }
 
       const total = state.instruments.length;
       const ready = state.instruments.filter(i => i.driveUrl && i.driveUrl.trim() !== '').length;
@@ -575,13 +668,15 @@
             </div>
 
             <div class="flex items-center gap-1.5 shrink-0">
-              <button
-                onclick="event.stopPropagation(); window.app.openEditModal(${item.no})"
-                class="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100"
-                title="Atur Link"
-              >
-                <i data-lucide="settings" class="w-3.5 h-3.5"></i>
-              </button>
+              ${state.isAdminLoggedIn ? `
+                <button
+                  onclick="event.stopPropagation(); window.openEditModal(${item.no})"
+                  class="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100"
+                  title="Atur Link"
+                >
+                  <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+                </button>
+              ` : ''}
               <span class="w-7 h-7 rounded-lg ${hasLink ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'} flex items-center justify-center">
                 <i data-lucide="${hasLink ? 'external-link' : 'alert-circle'}" class="w-3.5 h-3.5"></i>
               </span>
@@ -608,8 +703,10 @@
           showToast(`Membuka "${item.title}"...`, 'success');
           window.open(item.driveUrl.trim(), '_blank');
         } else {
-          showToast(`Link Google Drive belum diisi.`, 'warning');
-          openEditModal(no);
+          showToast(`Tautan Google Drive belum diatur oleh Admin.`, 'warning');
+          if (state.isAdminLoggedIn) {
+            window.openEditModal(no);
+          }
         }
       }, 420);
     }
@@ -654,22 +751,13 @@
       }).join('');
     }
 
-    function openEditModal(no) {
-      const item = state.instruments.find(i => i.no === no);
-      if (!item) return;
-      document.getElementById('modal-instrument-no').value = no;
-      document.getElementById('modal-edit-no').textContent = `#${no}`;
-      document.getElementById('modal-instrument-title').textContent = item.title;
-      document.getElementById('modal-instrument-url').value = item.driveUrl || '';
-      document.getElementById('modal-edit-link').classList.remove('hidden');
-    }
-
-    function closeEditModal() {
-      document.getElementById('modal-edit-link').classList.add('hidden');
-    }
-
     window.app = {
       switchTab(tab) {
+        if ((tab === 'manage' || tab === 'settings') && !state.isAdminLoggedIn) {
+          showToast("Silakan login sebagai Admin untuk mengakses menu ini.", "warning");
+          window.openLoginModal();
+          return;
+        }
         state.currentTab = tab;
         ['microsite', 'stats', 'manage', 'settings'].forEach(t => {
           document.getElementById(`view-${t}`).classList.toggle('hidden', t !== tab);
@@ -682,7 +770,46 @@
         });
       },
       openSettingsTab() {
+        if (!state.isAdminLoggedIn) {
+          window.openLoginModal();
+          return;
+        }
         this.switchTab('settings');
+      },
+      handleTopManageClick() {
+        if (state.isAdminLoggedIn) {
+          this.switchTab('manage');
+        } else {
+          window.openLoginModal();
+        }
+      },
+      handleNavManageClick() {
+        if (state.isAdminLoggedIn) {
+          this.switchTab('manage');
+        } else {
+          this.switchTab('microsite');
+          showToast("Menu Kelola Link khusus Admin.", "info");
+        }
+      },
+      handleNavSettingsClick() {
+        if (state.isAdminLoggedIn) {
+          this.switchTab('settings');
+        } else {
+          window.openLoginModal();
+        }
+      },
+      handleAuthClick() {
+        if (state.isAdminLoggedIn) {
+          if (confirm("Keluar dari akun Admin?")) {
+            state.isAdminLoggedIn = false;
+            sessionStorage.removeItem('smpn3_is_admin');
+            renderAll();
+            this.switchTab('microsite');
+            showToast("Berhasil keluar dari sesi Admin.", "info");
+          }
+        } else {
+          window.openLoginModal();
+        }
       },
       setCategory(cat) {
         state.selectedCategory = cat;
@@ -699,53 +826,67 @@
         renderGrid();
       },
       shakeAndOpen,
-      openEditModal,
-      closeEditModal,
-      openLoginModal() { document.getElementById('modal-login').classList.remove('hidden'); },
-      closeLoginModal() { document.getElementById('modal-login').classList.add('hidden'); },
       async submitSingleLink(e) {
         e.preventDefault();
+        if (!state.isAdminLoggedIn) {
+          showToast("Akses ditolak.", "error");
+          return;
+        }
         const no = Number(document.getElementById('modal-instrument-no').value);
         const url = document.getElementById('modal-instrument-url').value.trim();
         const idx = state.instruments.findIndex(i => i.no === no);
         if (idx !== -1) {
           state.instruments[idx].driveUrl = url;
+          localStorage.setItem('smpn3_admin_instruments', JSON.stringify(state.instruments));
           renderAll();
-          closeEditModal();
+          window.closeEditModal();
           showToast(`Tautan No. ${no} berhasil disimpan!`, 'success');
         }
       },
       async saveRow(no) {
+        if (!state.isAdminLoggedIn) {
+          showToast("Akses ditolak. Login Admin diperlukan.", "error");
+          return;
+        }
         const input = document.getElementById(`manage-input-${no}`);
         if (!input) return;
         const idx = state.instruments.findIndex(i => i.no === no);
         if (idx !== -1) {
           state.instruments[idx].driveUrl = input.value.trim();
+          localStorage.setItem('smpn3_admin_instruments', JSON.stringify(state.instruments));
           renderAll();
           showToast(`Tautan No. ${no} diperbarui!`, 'success');
         }
       },
       savePortalSettings(e) {
         e.preventDefault();
+        if (!state.isAdminLoggedIn) {
+          showToast("Akses ditolak.", "error");
+          return;
+        }
         state.portalConfig.teacherName = document.getElementById('set-teacher-name').value;
         state.portalConfig.schoolName = document.getElementById('set-school-name').value;
         state.portalConfig.photoUrl = document.getElementById('set-photo-url').value.trim();
         state.portalConfig.logoUrl = document.getElementById('set-logo-url').value.trim();
         state.portalConfig.whatsappNumber = document.getElementById('set-wa-number').value.trim() || "6281234567890";
+        
+        localStorage.setItem('smpn3_admin_config', JSON.stringify(state.portalConfig));
         renderAll();
-        showToast("Identitas portal berhasil diperbarui!", "success");
+        showToast("Identitas profil portal berhasil diperbarui!", "success");
         this.switchTab('microsite');
       },
       handleLogin(e) {
         e.preventDefault();
-        const u = document.getElementById('login-username').value;
-        const p = document.getElementById('login-password').value;
-        if (u === 'panji' && p === '123') {
-          state.currentUser = { name: 'Panji Hidayat, M.Pd' };
-          closeLoginModal();
+        const u = document.getElementById('login-username').value.trim();
+        const p = document.getElementById('login-password').value.trim();
+        if (u === 'admin' && p === 'merbau2026') {
+          state.isAdminLoggedIn = true;
+          sessionStorage.setItem('smpn3_is_admin', 'true');
+          window.closeLoginModal();
+          renderAll();
           showToast("Berhasil masuk sebagai Admin!", "success");
         } else {
-          showToast("Username/Password salah.", "error");
+          showToast("Username atau Password salah.", "error");
         }
       }
     };
