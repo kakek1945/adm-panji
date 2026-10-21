@@ -155,8 +155,8 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <button id="top-manage-btn" onclick="window.app.handleTopManageClick()" class="hidden p-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold transition-all" title="Atur Link">
-            <i data-lucide="link" class="w-4 h-4"></i>
+          <button id="top-manage-btn" onclick="window.app.handleTopManageClick()" class="hidden p-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold transition-all" title="Atur Link & Waktu">
+            <i data-lucide="clock" class="w-4 h-4"></i>
           </button>
           <button id="btn-auth-action" onclick="window.app.handleAuthClick()" class="px-3 py-1.5 rounded-xl bg-slate-900 text-white text-[11px] font-extrabold shadow-sm">
             Masuk Admin
@@ -295,14 +295,14 @@
           </div>
         </section>
 
-        <!-- VIEW 3: MANAGE DRIVE LINKS (Admin Only) -->
+        <!-- VIEW 3: MANAGE DRIVE LINKS & TIME-LOCK (Admin Only) -->
         <section id="view-manage" class="hidden space-y-4">
           <div class="pin-card p-4">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Kelola Link Google Drive</h3>
+              <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Kelola Tautan & Waktu Buka</h3>
               <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700">Admin Mode</span>
             </div>
-            <p class="text-[11px] text-slate-500 mt-2">Masukkan URL Google Drive pada masing-masing nomor instrumen di bawah ini.</p>
+            <p class="text-[11px] text-slate-500 mt-2">Atur URL Google Drive dan waktu buka akses (Schedule) bagi setiap instrumen.</p>
 
             <div class="mt-4 space-y-3" id="manage-links-container"></div>
           </div>
@@ -351,19 +351,19 @@
           <span class="text-[9px] mt-0.5">Kesiapan</span>
         </button>
         <button id="nav-btn-manage" onclick="window.app.handleNavManageClick()" class="flex flex-col items-center justify-center p-2 text-slate-400 font-semibold transition-all">
-          <i data-lucide="link-2" class="w-5 h-5"></i>
-          <span id="nav-label-manage" class="text-[9px] mt-0.5">Link Drive</span>
+          <i data-lucide="clock" class="w-5 h-5"></i>
+          <span id="nav-label-manage" class="text-[9px] mt-0.5">Atur Waktu</span>
         </button>
         <button id="nav-btn-settings" onclick="window.app.handleNavSettingsClick()" class="flex flex-col items-center justify-center p-2 text-slate-400 font-semibold transition-all">
           <i data-lucide="settings" class="w-5 h-5"></i>
-          <span id="nav-label-settings" class="text-[9px] mt-0.5">Profil</span>
+          <span id="nav-label-settings" class="text-[9px] mt-0.5">Login</span>
         </button>
       </nav>
 
     </div>
   </div>
 
-  <!-- MODAL EDIT SINGLE LINK -->
+  <!-- MODAL EDIT SINGLE LINK & TIME-LOCK -->
   <div id="modal-edit-link" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
@@ -375,13 +375,18 @@
       <div>
         <p id="modal-instrument-title" class="text-xs font-bold text-slate-800 bg-slate-50 p-3 rounded-xl border border-slate-200"></p>
       </div>
-      <form onsubmit="window.app.submitSingleLink(event)" class="space-y-3">
+      <form onsubmit="window.app.submitSingleLink(event)" class="space-y-3 text-xs">
         <input type="hidden" id="modal-instrument-no" />
         <div>
-          <label class="block text-[11px] font-bold text-slate-600 mb-1">URL Google Drive</label>
-          <input type="url" id="modal-instrument-url" placeholder="https://drive.google.com/..." class="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-xs focus:outline-none focus:border-slate-900 font-medium" />
+          <label class="block font-bold text-slate-600 mb-1">URL Google Drive</label>
+          <input type="url" id="modal-instrument-url" placeholder="https://drive.google.com/..." class="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-medium" />
         </div>
-        <button type="submit" class="w-full py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold">Simpan Tautan</button>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Jadwal Buka Akses (Waktu)</label>
+          <input type="datetime-local" id="modal-instrument-time" class="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-medium" />
+          <p class="text-[10px] text-slate-400 mt-1">Jika dikosongkan, tautan akan langsung dapat dibuka kapan saja.</p>
+        </div>
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-bold">Simpan Tautan & Waktu</button>
       </form>
     </div>
   </div>
@@ -422,12 +427,12 @@
     // KONFIGURASI FIREBASE ANDA
     // -------------------------------------------------------------------------
     const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-      apiKey: "MASUKKAN_API_KEY_ANDA",
-      authDomain: "project-id.firebaseapp.com",
-      projectId: "project-id",
-      storageBucket: "project-id.appspot.com",
-      messagingSenderId: "sender-id",
-      appId: "app-id"
+  apiKey: "AIzaSyBwPUft7vLimwrZ9IigxhDdqDzRA6qgpBA",
+  authDomain: "adm-panji.firebaseapp.com",
+  projectId: "adm-panji",
+  storageBucket: "adm-panji.firebasestorage.app",
+  messagingSenderId: "733622558355",
+  appId: "1:733622558355:web:e87736a24e5190ed15b766"
     };
 
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'portal-smpn3-merbau';
@@ -445,35 +450,35 @@
     }
 
     const BASE_INSTRUMENTS_CATALOG = [
-      { no: 1,  category: "Perencanaan Waktu",     title: "Program Tahunan", driveUrl: "" },
-      { no: 2,  category: "Perencanaan Waktu",     title: "Program Semester", driveUrl: "" },
-      { no: 3,  category: "Perencanaan Waktu",     title: "Kalender Pendidikan", driveUrl: "" },
-      { no: 4,  category: "Perencanaan Waktu",     title: "Analisis Minggu Efektif", driveUrl: "" },
-      { no: 5,  category: "Perencanaan Waktu",     title: "Analisis Hari Efektif", driveUrl: "" },
-      { no: 6,  category: "Perencanaan Waktu",     title: "Jadwal Tatap Muka", driveUrl: "" },
-      { no: 7,  category: "Kurikulum & RPP",       title: "Capaian Pembelajaran ( CP )", driveUrl: "" },
-      { no: 8,  category: "Kurikulum & RPP",       title: "Alur Tujuan Pembelajaran (ATP)", driveUrl: "" },
-      { no: 9,  category: "Kurikulum & RPP",       title: "Dokumen KKTP", driveUrl: "" },
-      { no: 10, category: "Kurikulum & RPP",       title: "Perencanaan Pembelajaran fokus ke Literasi", driveUrl: "" },
-      { no: 11, category: "Kurikulum & RPP",       title: "Perencanaan Pembelajaran fokus di Numerasi", driveUrl: "" },
-      { no: 12, category: "Kurikulum & RPP",       title: "Perencanaan Pembelajaran (C1 sampai C3)", driveUrl: "" },
-      { no: 13, category: "Kurikulum & RPP",       title: "Perencanaan Pembelajaran (C4 sampai C6)", driveUrl: "" },
-      { no: 14, category: "Kurikulum & RPP",       title: "Perencanaan Pembelajaran (C1 sampai C6)", driveUrl: "" },
-      { no: 15, category: "Kurikulum & RPP",       title: "Model Pembelajaran PBL, PJBL, Inquiri, Kolaboratif", driveUrl: "" },
-      { no: 16, category: "Kurikulum & RPP",       title: "Perencanaan Pembelajaran berdiferensiasi", driveUrl: "" },
-      { no: 17, category: "Pelaksanaan & Jurnal",  title: "Batas Pelajaran", driveUrl: "" },
-      { no: 18, category: "Pelaksanaan & Jurnal",  title: "Jurnal Refleksi Pembelajaran", driveUrl: "" },
-      { no: 19, category: "Pelaksanaan & Jurnal",  title: "Absensi Murid", driveUrl: "" },
-      { no: 20, category: "Asesmen & Inovasi",     title: "Dokumen Asesmen Awal", driveUrl: "" },
-      { no: 21, category: "Pelaksanaan & Jurnal",  title: "Dokumen Data Murid Dukungan Khusus", driveUrl: "" },
-      { no: 22, category: "Pelaksanaan & Jurnal",  title: "Program Pendampingan Khusus", driveUrl: "" },
-      { no: 23, category: "Asesmen & Inovasi",     title: "Dokumen Asesmen Formatif (Daftar Nilai)", driveUrl: "" },
-      { no: 24, category: "Asesmen & Inovasi",     title: "Dokumen Asesmen Sumatif (Daftar Nilai)", driveUrl: "" },
-      { no: 25, category: "Asesmen & Inovasi",     title: "Dokumen Panduan Pembelajaran & Asesmen Revisi 2025", driveUrl: "" },
-      { no: 26, category: "Asesmen & Inovasi",     title: "Dokumen Portofolio Murid", driveUrl: "" },
-      { no: 27, category: "Asesmen & Inovasi",     title: "Program Remedial", driveUrl: "" },
-      { no: 28, category: "Asesmen & Inovasi",     title: "Program Pengayaan", driveUrl: "" },
-      { no: 29, category: "Asesmen & Inovasi",     title: "Karya Inovasi Pembelajaran", driveUrl: "" }
+      { no: 1,  category: "Perencanaan Waktu",     title: "Program Tahunan", driveUrl: "", openTime: "" },
+      { no: 2,  category: "Perencanaan Waktu",     title: "Program Semester", driveUrl: "", openTime: "" },
+      { no: 3,  category: "Perencanaan Waktu",     title: "Kalender Pendidikan", driveUrl: "", openTime: "" },
+      { no: 4,  category: "Perencanaan Waktu",     title: "Analisis Minggu Efektif", driveUrl: "", openTime: "" },
+      { no: 5,  category: "Perencanaan Waktu",     title: "Analisis Hari Efektif", driveUrl: "", openTime: "" },
+      { no: 6,  category: "Perencanaan Waktu",     title: "Jadwal Tatap Muka", driveUrl: "", openTime: "" },
+      { no: 7,  category: "Kurikulum & RPP",       title: "Capaian Pembelajaran ( CP )", driveUrl: "", openTime: "" },
+      { no: 8,  category: "Kurikulum & RPP",       title: "Alur Tujuan Pembelajaran (ATP)", driveUrl: "", openTime: "" },
+      { no: 9,  category: "Kurikulum & RPP",       title: "Dokumen KKTP", driveUrl: "", openTime: "" },
+      { no: 10, category: "Kurikulum & RPP",       title: "Perencanaan Pembelajaran fokus ke Literasi", driveUrl: "", openTime: "" },
+      { no: 11, category: "Kurikulum & RPP",       title: "Perencanaan Pembelajaran fokus di Numerasi", driveUrl: "", openTime: "" },
+      { no: 12, category: "Kurikulum & RPP",       title: "Perencanaan Pembelajaran (C1 sampai C3)", driveUrl: "", openTime: "" },
+      { no: 13, category: "Kurikulum & RPP",       title: "Perencanaan Pembelajaran (C4 sampai C6)", driveUrl: "", openTime: "" },
+      { no: 14, category: "Kurikulum & RPP",       title: "Perencanaan Pembelajaran (C1 sampai C6)", driveUrl: "", openTime: "" },
+      { no: 15, category: "Kurikulum & RPP",       title: "Model Pembelajaran PBL, PJBL, Inquiri, Kolaboratif", driveUrl: "", openTime: "" },
+      { no: 16, category: "Kurikulum & RPP",       title: "Perencanaan Pembelajaran berdiferensiasi", driveUrl: "", openTime: "" },
+      { no: 17, category: "Pelaksanaan & Jurnal",  title: "Batas Pelajaran", driveUrl: "", openTime: "" },
+      { no: 18, category: "Pelaksanaan & Jurnal",  title: "Jurnal Refleksi Pembelajaran", driveUrl: "", openTime: "" },
+      { no: 19, category: "Pelaksanaan & Jurnal",  title: "Absensi Murid", driveUrl: "", openTime: "" },
+      { no: 20, category: "Asesmen & Inovasi",     title: "Dokumen Asesmen Awal", driveUrl: "", openTime: "" },
+      { no: 21, category: "Pelaksanaan & Jurnal",  title: "Dokumen Data Murid Dukungan Khusus", driveUrl: "", openTime: "" },
+      { no: 22, category: "Pelaksanaan & Jurnal",  title: "Program Pendampingan Khusus", driveUrl: "", openTime: "" },
+      { no: 23, category: "Asesmen & Inovasi",     title: "Dokumen Asesmen Formatif (Daftar Nilai)", driveUrl: "", openTime: "" },
+      { no: 24, category: "Asesmen & Inovasi",     title: "Dokumen Asesmen Sumatif (Daftar Nilai)", driveUrl: "", openTime: "" },
+      { no: 25, category: "Asesmen & Inovasi",     title: "Dokumen Panduan Pembelajaran & Asesmen Revisi 2025", driveUrl: "", openTime: "" },
+      { no: 26, category: "Asesmen & Inovasi",     title: "Dokumen Portofolio Murid", driveUrl: "", openTime: "" },
+      { no: 27, category: "Asesmen & Inovasi",     title: "Program Remedial", driveUrl: "", openTime: "" },
+      { no: 28, category: "Asesmen & Inovasi",     title: "Program Pengayaan", driveUrl: "", openTime: "" },
+      { no: 29, category: "Asesmen & Inovasi",     title: "Karya Inovasi Pembelajaran", driveUrl: "", openTime: "" }
     ];
 
     const state = {
@@ -529,6 +534,7 @@
       document.getElementById('modal-edit-no').textContent = `#${no}`;
       document.getElementById('modal-instrument-title').textContent = item.title;
       document.getElementById('modal-instrument-url').value = item.driveUrl || '';
+      document.getElementById('modal-instrument-time').value = item.openTime || '';
       document.getElementById('modal-edit-link').classList.remove('hidden');
     }
 
@@ -624,14 +630,14 @@
         heroCameraBtn.classList.remove('hidden');
         authBtn.textContent = "Keluar";
         authBtn.className = "px-3 py-1.5 rounded-xl bg-rose-600 text-white text-[11px] font-extrabold shadow-sm";
-        navManageLabel.textContent = "Kelola Link";
+        navManageLabel.textContent = "Atur Waktu";
         navSettingsLabel.textContent = "Profil";
       } else {
         topManageBtn.classList.add('hidden');
         heroCameraBtn.classList.add('hidden');
         authBtn.textContent = "Masuk Admin";
         authBtn.className = "px-3 py-1.5 rounded-xl bg-slate-900 text-white text-[11px] font-extrabold shadow-sm";
-        navManageLabel.textContent = "Atur Link";
+        navManageLabel.textContent = "Atur Waktu";
         navSettingsLabel.textContent = "Login";
       }
 
@@ -652,6 +658,22 @@
       if (window.lucide) window.lucide.createIcons();
     }
 
+    function isLinkAccessible(item) {
+      if (!item.driveUrl || item.driveUrl.trim() === '') return false;
+      if (state.isAdminLoggedIn) return true; // Admin selalu bisa akses
+      if (!item.openTime || item.openTime === '') return true; // Jika tidak diset waktu, bebas diakses
+      
+      const now = new Date().getTime();
+      const openTime = new Date(item.openTime).getTime();
+      return now >= openTime;
+    }
+
+    function formatTimeLabel(timeStr) {
+      if (!timeStr) return '';
+      const d = new Date(timeStr);
+      return d.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+    }
+
     function renderGrid() {
       const grid = document.getElementById('instruments-grid');
       if (!grid) return;
@@ -670,6 +692,21 @@
 
       grid.innerHTML = filtered.map(item => {
         const hasLink = Boolean(item.driveUrl && item.driveUrl.trim() !== '');
+        const accessible = isLinkAccessible(item);
+        
+        // Format preview link sebagian jika terkunci waktu
+        let urlDisplay = '';
+        if (hasLink) {
+          if (accessible) {
+            urlDisplay = `<span class="text-emerald-600 font-bold text-[10px]">Tautan Tersedia (Dibuka)</span>`;
+          } else {
+            const maskedUrl = item.driveUrl.substring(0, Math.min(22, item.driveUrl.length)) + '... [Terkunci Waktu]';
+            urlDisplay = `<span class="text-amber-600 font-semibold text-[10px]" title="Dibuka pada: ${formatTimeLabel(item.openTime)}">🔒 ${maskedUrl} (Buka: ${formatTimeLabel(item.openTime)})</span>`;
+          }
+        } else {
+          urlDisplay = `<span class="text-slate-400 font-medium text-[10px]">Belum ada tautan</span>`;
+        }
+
         return `
           <div
             id="instrument-card-${item.no}"
@@ -677,12 +714,13 @@
             class="pin-card p-3.5 cursor-pointer flex items-center justify-between gap-3 group"
           >
             <div class="flex items-center gap-3 min-w-0">
-              <span class="w-8 h-8 rounded-xl ${hasLink ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'} font-extrabold text-xs flex items-center justify-center shrink-0">
+              <span class="w-8 h-8 rounded-xl ${hasLink ? (accessible ? 'bg-slate-900 text-white' : 'bg-amber-600 text-white') : 'bg-slate-100 text-slate-600'} font-extrabold text-xs flex items-center justify-center shrink-0">
                 ${item.no}
               </span>
               <div class="min-w-0">
                 <span class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400 block">${item.category}</span>
                 <h4 class="text-xs font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">${item.title}</h4>
+                <div class="mt-0.5 truncate">${urlDisplay}</div>
               </div>
             </div>
 
@@ -691,13 +729,13 @@
                 <button
                   onclick="event.stopPropagation(); openEditModal(${item.no})"
                   class="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100"
-                  title="Atur Link"
+                  title="Atur Link & Waktu"
                 >
-                  <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+                  <i data-lucide="clock" class="w-3.5 h-3.5"></i>
                 </button>
               ` : ''}
-              <span class="w-7 h-7 rounded-lg ${hasLink ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'} flex items-center justify-center">
-                <i data-lucide="${hasLink ? 'external-link' : 'alert-circle'}" class="w-3.5 h-3.5"></i>
+              <span class="w-7 h-7 rounded-lg ${hasLink ? (accessible ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600') : 'bg-slate-100 text-slate-400'} flex items-center justify-center">
+                <i data-lucide="${hasLink ? (accessible ? 'external-link' : 'lock') : 'alert-circle'}" class="w-3.5 h-3.5"></i>
               </span>
             </div>
           </div>
@@ -718,14 +756,19 @@
       }
 
       setTimeout(() => {
-        if (item.driveUrl && item.driveUrl.trim() !== '') {
-          showToast(`Membuka "${item.title}"...`, 'success');
-          window.open(item.driveUrl.trim(), '_blank');
-        } else {
+        if (!item.driveUrl || item.driveUrl.trim() === '') {
           showToast(`Tautan Google Drive belum diatur oleh Admin.`, 'warning');
           if (state.isAdminLoggedIn) {
             openEditModal(no);
           }
+          return;
+        }
+
+        if (isLinkAccessible(item)) {
+          showToast(`Membuka "${item.title}"...`, 'success');
+          window.open(item.driveUrl.trim(), '_blank');
+        } else {
+          showToast(`Akses belum diizinkan oleh admin! Baru dapat dibuka pada ${formatTimeLabel(item.openTime)}.`, 'error');
         }
       }, 420);
     }
@@ -740,9 +783,12 @@
             <span class="font-extrabold text-slate-900">#${item.no}. ${item.title}</span>
             <span class="text-[10px] text-slate-400 font-semibold">${item.category}</span>
           </div>
-          <div class="flex items-center gap-2">
-            <input type="url" id="manage-input-${item.no}" value="${item.driveUrl || ''}" placeholder="https://drive.google.com/..." class="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-[11px]" />
-            <button onclick="window.app.saveRow(${item.no})" class="px-3 py-1.5 rounded-lg bg-slate-900 text-white font-bold text-[11px]">Simpan</button>
+          <div class="space-y-1.5">
+            <input type="url" id="manage-url-${item.no}" value="${item.driveUrl || ''}" placeholder="https://drive.google.com/..." class="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-[11px]" />
+            <div class="flex items-center gap-2">
+              <input type="datetime-local" id="manage-time-${item.no}" value="${item.openTime || ''}" class="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-[11px]" />
+              <button onclick="window.app.saveRow(${item.no})" class="px-3 py-1.5 rounded-lg bg-slate-900 text-white font-bold text-[11px] whitespace-nowrap">Simpan</button>
+            </div>
           </div>
         </div>
       `).join('');
@@ -807,7 +853,7 @@
           this.switchTab('manage');
         } else {
           this.switchTab('microsite');
-          showToast("Menu Kelola Link khusus Admin.", "info");
+          showToast("Menu Atur Waktu khusus Admin.", "info");
         }
       },
       handleNavSettingsClick() {
@@ -855,13 +901,15 @@
         }
         const no = Number(document.getElementById('modal-instrument-no').value);
         const url = document.getElementById('modal-instrument-url').value.trim();
+        const openTime = document.getElementById('modal-instrument-time').value;
         const idx = state.instruments.findIndex(i => i.no === no);
         if (idx !== -1) {
           state.instruments[idx].driveUrl = url;
+          state.instruments[idx].openTime = openTime;
           await saveToFirestore();
           renderAll();
           closeEditModal();
-          showToast(`Tautan No. ${no} berhasil disimpan!`, 'success');
+          showToast(`Tautan & Jadwal No. ${no} berhasil disimpan!`, 'success');
         }
       },
       async saveRow(no) {
@@ -869,11 +917,13 @@
           showToast("Akses ditolak. Login Admin diperlukan.", "error");
           return;
         }
-        const input = document.getElementById(`manage-input-${no}`);
-        if (!input) return;
+        const urlInput = document.getElementById(`manage-url-${no}`);
+        const timeInput = document.getElementById(`manage-time-${no}`);
+        if (!urlInput || !timeInput) return;
         const idx = state.instruments.findIndex(i => i.no === no);
         if (idx !== -1) {
-          state.instruments[idx].driveUrl = input.value.trim();
+          state.instruments[idx].driveUrl = urlInput.value.trim();
+          state.instruments[idx].openTime = timeInput.value;
           await saveToFirestore();
           renderAll();
           showToast(`Tautan No. ${no} diperbarui!`, 'success');
