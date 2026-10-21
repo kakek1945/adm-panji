@@ -167,9 +167,6 @@
       <!-- SCROLLABLE BODY -->
       <div class="phone-scroll-body space-y-4" id="phone-main-scroll">
         
-        <!-- PREVIEW BANNER -->
-        <div id="preview-banner-container"></div>
-
         <!-- VIEW 1: MICROSITE LIST (INSTRUMEN 1-29) -->
         <section id="view-microsite" class="space-y-4">
           
@@ -371,7 +368,7 @@
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
         <span id="modal-edit-no" class="px-2.5 py-1 rounded-xl bg-slate-900 text-white font-extrabold text-xs">#1</span>
-        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600">
+        <button onclick="window.app.closeEditModal()" class="text-slate-400 hover:text-slate-600">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -389,20 +386,19 @@
     </div>
   </div>
 
-  <!-- MODAL LOGIN ADMIN -->
+  <!-- MODAL LOGIN ADMIN (FIREBASE AUTH) -->
   <div id="modal-login" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
         <h4 class="font-extrabold text-slate-900 text-sm">Autentikasi Admin</h4>
-        <button onclick="closeLoginModal()" class="text-slate-400 hover:text-slate-600">
+        <button onclick="window.app.closeLoginModal()" class="text-slate-400 hover:text-slate-600">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
-      <p class="text-[11px] text-slate-500">Masukkan kredensial admin untuk dapat mengubah link Google Drive dan identitas portal.</p>
       <form onsubmit="window.app.handleLogin(event)" class="space-y-3 text-xs">
         <div>
-          <label class="block font-bold mb-1">Username / ID</label>
-          <input type="text" id="login-username" required placeholder="admin" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200" />
+          <label class="block font-bold mb-1">Email Admin</label>
+          <input type="email" id="login-email" required placeholder="admin@sekolah.sch.id" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200" />
         </div>
         <div>
           <label class="block font-bold mb-1">Password</label>
@@ -410,40 +406,42 @@
         </div>
         <button type="submit" class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-bold">Masuk Sebagai Admin</button>
       </form>
-      <div class="text-[10px] text-slate-400 text-center bg-slate-50 p-2 rounded-xl">
-        Demo Login: <code class="font-bold text-slate-700">admin</code> / <code class="font-bold text-slate-700">merbau2026</code>
-      </div>
     </div>
   </div>
 
   <!-- TOAST CONTAINER -->
   <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100000] flex flex-col gap-2 max-w-xs w-full pointer-events-none px-4"></div>
 
-  <!-- FIREBASE SDK & CONFIGURATION SCRIPT -->
+  <!-- FIREBASE SDK & APP INITIALIZATION SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // -------------------------------------------------------------------------
-    // TEMPAT PENGISIAN KONFIGURASI FIREBASE API KEY ANDA (Opsional untuk Cloud)
+    // KONFIGURASI FIREBASE ANDA
     // -------------------------------------------------------------------------
     const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-   apiKey: "AIzaSyBwPUft7vLimwrZ9IigxhDdqDzRA6qgpBA",
-  authDomain: "adm-panji.firebaseapp.com",
-  projectId: "adm-panji",
-  storageBucket: "adm-panji.firebasestorage.app",
-  messagingSenderId: "733622558355",
-  appId: "1:733622558355:web:e87736a24e5190ed15b766"
+      apiKey: "MASUKKAN_API_KEY_ANDA",
+      authDomain: "project-id.firebaseapp.com",
+      projectId: "project-id",
+      storageBucket: "project-id.appspot.com",
+      messagingSenderId: "sender-id",
+      appId: "app-id"
     };
 
-    let db, auth;
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'portal-smpn3-merbau';
+    
+    let app, db, auth;
+    let isFirebaseReady = false;
+
     try {
-      const app = initializeApp(firebaseConfig);
+      app = initializeApp(firebaseConfig);
       db = getFirestore(app);
       auth = getAuth(app);
+      isFirebaseReady = true;
     } catch(e) {
-      console.log("Firebase initialized in local fallback mode.");
+      console.log("Firebase not fully configured. Running in offline/local state.");
     }
 
     const BASE_INSTRUMENTS_CATALOG = [
@@ -490,7 +488,7 @@
         logoUrl: "https://i.ibb.co.com/fVTzR5H6/logo.png",
         whatsappNumber: "6281234567890"
       },
-      instruments: []
+      instruments: JSON.parse(JSON.stringify(BASE_INSTRUMENTS_CATALOG))
     };
 
     function showToast(message, type = 'info') {
@@ -509,20 +507,20 @@
       setTimeout(() => toast.remove(), 3000);
     }
 
-    window.openLoginModal = function() {
+    function openLoginModal() {
       const modal = document.getElementById('modal-login');
       if (modal) modal.classList.remove('hidden');
     }
 
-    window.closeLoginModal = function() {
+    function closeLoginModal() {
       const modal = document.getElementById('modal-login');
       if (modal) modal.classList.add('hidden');
     }
 
-    window.openEditModal = function(no) {
+    function openEditModal(no) {
       if (!state.isAdminLoggedIn) {
         showToast("Akses ditolak. Silakan login sebagai Admin terlebih dahulu.", "error");
-        window.openLoginModal();
+        openLoginModal();
         return;
       }
       const item = state.instruments.find(i => i.no === no);
@@ -534,37 +532,58 @@
       document.getElementById('modal-edit-link').classList.remove('hidden');
     }
 
-    window.closeEditModal = function() {
+    function closeEditModal() {
       document.getElementById('modal-edit-link').classList.add('hidden');
     }
 
-    function initApp() {
-      const savedInstruments = localStorage.getItem('smpn3_admin_instruments');
-      if (savedInstruments) {
-        try { state.instruments = JSON.parse(savedInstruments); }
-        catch(e) { state.instruments = BASE_INSTRUMENTS_CATALOG.map(i => ({ ...i })); }
+    async function initApp() {
+      if (isFirebaseReady) {
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            state.isAdminLoggedIn = true;
+          } else {
+            state.isAdminLoggedIn = false;
+          }
+          renderAll();
+        });
+
+        try {
+          const settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_settings');
+          onSnapshot(settingsRef, (docSnap) => {
+            if (docSnap.exists()) {
+              state.portalConfig = { ...state.portalConfig, ...docSnap.data() };
+              renderAll();
+            } else {
+              setDoc(settingsRef, state.portalConfig).catch(() => {});
+            }
+          }, (err) => console.log(err));
+
+          const instrumentsRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_instruments');
+          onSnapshot(instrumentsRef, (docSnap) => {
+            if (docSnap.exists() && docSnap.data().list) {
+              state.instruments = docSnap.data().list;
+              renderAll();
+            } else {
+              setDoc(instrumentsRef, { list: BASE_INSTRUMENTS_CATALOG }).catch(() => {});
+            }
+          }, (err) => console.log(err));
+        } catch (e) {
+          console.log("Firestore sync skipped:", e);
+        }
       } else {
-        state.instruments = BASE_INSTRUMENTS_CATALOG.map(i => ({ ...i }));
+        renderAll();
       }
-
-      const savedConfig = localStorage.getItem('smpn3_admin_config');
-      if (savedConfig) {
-        try { state.portalConfig = JSON.parse(savedConfig); } catch(e) {}
-      }
-
-      const sessionAdmin = sessionStorage.getItem('smpn3_is_admin');
-      if (sessionAdmin === 'true') {
-        state.isAdminLoggedIn = true;
-      }
-
-      renderBanner();
-      renderAll();
     }
 
-    function renderBanner() {
-      const banner = document.getElementById('preview-banner-container');
-      if (banner) {
-        banner.innerHTML = `<div class="bg-slate-900 text-white text-[10px] font-bold py-1.5 px-3 rounded-xl text-center">📱 Format 9:16 Mobile View • Mode Admin: <u>admin</u> / <u>merbau2026</u></div>`;
+    async function saveToFirestore() {
+      if (!isFirebaseReady || !state.isAdminLoggedIn) return;
+      try {
+        const instrumentsRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_instruments');
+        await setDoc(instrumentsRef, { list: state.instruments });
+        const settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_settings');
+        await setDoc(settingsRef, state.portalConfig);
+      } catch (e) {
+        console.error("Error saving to Firestore:", e);
       }
     }
 
@@ -670,7 +689,7 @@
             <div class="flex items-center gap-1.5 shrink-0">
               ${state.isAdminLoggedIn ? `
                 <button
-                  onclick="event.stopPropagation(); window.openEditModal(${item.no})"
+                  onclick="event.stopPropagation(); openEditModal(${item.no})"
                   class="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100"
                   title="Atur Link"
                 >
@@ -705,7 +724,7 @@
         } else {
           showToast(`Tautan Google Drive belum diatur oleh Admin.`, 'warning');
           if (state.isAdminLoggedIn) {
-            window.openEditModal(no);
+            openEditModal(no);
           }
         }
       }, 420);
@@ -755,7 +774,7 @@
       switchTab(tab) {
         if ((tab === 'manage' || tab === 'settings') && !state.isAdminLoggedIn) {
           showToast("Silakan login sebagai Admin untuk mengakses menu ini.", "warning");
-          window.openLoginModal();
+          openLoginModal();
           return;
         }
         state.currentTab = tab;
@@ -771,7 +790,7 @@
       },
       openSettingsTab() {
         if (!state.isAdminLoggedIn) {
-          window.openLoginModal();
+          openLoginModal();
           return;
         }
         this.switchTab('settings');
@@ -780,7 +799,7 @@
         if (state.isAdminLoggedIn) {
           this.switchTab('manage');
         } else {
-          window.openLoginModal();
+          openLoginModal();
         }
       },
       handleNavManageClick() {
@@ -795,20 +814,22 @@
         if (state.isAdminLoggedIn) {
           this.switchTab('settings');
         } else {
-          window.openLoginModal();
+          openLoginModal();
         }
       },
-      handleAuthClick() {
+      async handleAuthClick() {
         if (state.isAdminLoggedIn) {
           if (confirm("Keluar dari akun Admin?")) {
+            if (isFirebaseReady && auth) {
+              await signOut(auth);
+            }
             state.isAdminLoggedIn = false;
-            sessionStorage.removeItem('smpn3_is_admin');
             renderAll();
             this.switchTab('microsite');
             showToast("Berhasil keluar dari sesi Admin.", "info");
           }
         } else {
-          window.openLoginModal();
+          openLoginModal();
         }
       },
       setCategory(cat) {
@@ -837,9 +858,9 @@
         const idx = state.instruments.findIndex(i => i.no === no);
         if (idx !== -1) {
           state.instruments[idx].driveUrl = url;
-          localStorage.setItem('smpn3_admin_instruments', JSON.stringify(state.instruments));
+          await saveToFirestore();
           renderAll();
-          window.closeEditModal();
+          closeEditModal();
           showToast(`Tautan No. ${no} berhasil disimpan!`, 'success');
         }
       },
@@ -853,12 +874,12 @@
         const idx = state.instruments.findIndex(i => i.no === no);
         if (idx !== -1) {
           state.instruments[idx].driveUrl = input.value.trim();
-          localStorage.setItem('smpn3_admin_instruments', JSON.stringify(state.instruments));
+          await saveToFirestore();
           renderAll();
           showToast(`Tautan No. ${no} diperbarui!`, 'success');
         }
       },
-      savePortalSettings(e) {
+      async savePortalSettings(e) {
         e.preventDefault();
         if (!state.isAdminLoggedIn) {
           showToast("Akses ditolak.", "error");
@@ -870,25 +891,33 @@
         state.portalConfig.logoUrl = document.getElementById('set-logo-url').value.trim();
         state.portalConfig.whatsappNumber = document.getElementById('set-wa-number').value.trim() || "6281234567890";
         
-        localStorage.setItem('smpn3_admin_config', JSON.stringify(state.portalConfig));
+        await saveToFirestore();
         renderAll();
         showToast("Identitas profil portal berhasil diperbarui!", "success");
         this.switchTab('microsite');
       },
-      handleLogin(e) {
+      async handleLogin(e) {
         e.preventDefault();
-        const u = document.getElementById('login-username').value.trim();
-        const p = document.getElementById('login-password').value.trim();
-        if (u === 'admin' && p === 'merbau2026') {
-          state.isAdminLoggedIn = true;
-          sessionStorage.setItem('smpn3_is_admin', 'true');
-          window.closeLoginModal();
-          renderAll();
-          showToast("Berhasil masuk sebagai Admin!", "success");
-        } else {
-          showToast("Username atau Password salah.", "error");
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value.trim();
+
+        if (!isFirebaseReady) {
+          showToast("Firebase belum dikonfigurasi.", "error");
+          return;
         }
-      }
+
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+          state.isAdminLoggedIn = true;
+          closeLoginModal();
+          renderAll();
+          showToast("Berhasil masuk sebagai Admin via Firebase!", "success");
+        } catch (error) {
+          showToast("Autentikasi gagal: " + error.message, "error");
+        }
+      },
+      closeLoginModal,
+      closeEditModal
     };
 
     window.addEventListener('DOMContentLoaded', initApp);
