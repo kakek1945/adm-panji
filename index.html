@@ -226,20 +226,6 @@
             </div>
           </div>
 
-          <!-- SEARCH & FILTER BAR -->
-          <div class="space-y-2">
-            <div class="relative">
-              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-              <input
-                type="text"
-                id="search-instrument"
-                oninput="window.app.filterInstruments()"
-                placeholder="Cari nomor / nama perangkat..."
-                class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-900 font-medium shadow-sm"
-              />
-            </div>
-          </div>
-
           <!-- INSTRUMENTS LIST CONTAINER -->
           <div id="instruments-container" class="space-y-2.5 pb-4">
             <!-- Rendered by JS -->
@@ -298,7 +284,7 @@
       </div>
 
       <!-- BOTTOM NAVIGATION BAR (Hanya tampil jika admin login) -->
-      <nav id="admin-bottom-nav" class="hidden absolute bottom-0 left-0 right-0 glass-nav px-6 py-3 flex items-center justify-around z-30">
+      <nav id="admin-bottom-nav" class="hidden absolute bottom-0 left-0 right-0 glass-nav px-6 py-3 flex items-center justify-around z-30 bg-white/90 backdrop-blur-md border-t border-slate-200">
         <button onclick="window.app.switchView('microsite')" id="nav-btn-home" class="flex flex-col items-center gap-1 text-slate-900 font-extrabold transition-all">
           <i data-lucide="compass" class="w-5 h-5"></i>
           <span class="text-[10px]">Portal</span>
@@ -349,10 +335,10 @@
     import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // KONFIGURASI APLIKASI
-    const IS_PREVIEW = true; // Ubah ke false saat deploy produksi dengan Firebase nyata
+    const IS_PREVIEW = false; // Terhubung murni ke Firebase
 
     const defaultFirebaseConfig = {
-    apiKey: "AIzaSyBwPUft7vLimwrZ9IigxhDdqDzRA6qgpBA",
+      apiKey: "AIzaSyBwPUft7vLimwrZ9IigxhDdqDzRA6qgpBA",
   authDomain: "adm-panji.firebaseapp.com",
   projectId: "adm-panji",
   storageBucket: "adm-panji.firebasestorage.app",
@@ -416,17 +402,9 @@
       }
 
       async initAuth() {
-        if (IS_PREVIEW) {
-          // Demo Mode state
-          this.setupUI();
-          return;
-        }
-
         try {
           if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
             await signInWithCustomToken(auth, __initial_auth_token);
-          } else {
-            await signInAnonymously(auth);
           }
           onAuthStateChanged(auth, (user) => {
             this.currentUser = user;
@@ -439,20 +417,6 @@
       }
 
       async initData() {
-        if (IS_PREVIEW) {
-          const localData = localStorage.getItem('smpn3_portal_data');
-          if (localData) {
-            try {
-              const parsed = JSON.parse(localData);
-              this.instruments = parsed.instruments || this.instruments;
-              this.profilePhoto = parsed.profilePhoto || this.profilePhoto;
-            } catch(e) {}
-          }
-          this.render();
-          return;
-        }
-
-        // Production Firestore sync
         try {
           const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_state');
           onSnapshot(docRef, (snap) => {
@@ -507,7 +471,6 @@
         const container = document.getElementById('instruments-container');
         if (!container) return;
 
-        const searchTerm = (document.getElementById('search-instrument')?.value || "").toLowerCase();
         container.innerHTML = '';
 
         let filledCount = 0;
@@ -516,10 +479,6 @@
         this.instruments.forEach((item) => {
           if (item.driveUrl && item.driveUrl.trim() !== '') {
             filledCount++;
-          }
-
-          if (searchTerm && !item.title.toLowerCase().includes(searchTerm) && !item.no.toString().includes(searchTerm)) {
-            return;
           }
 
           const card = document.createElement('div');
@@ -534,7 +493,6 @@
           }
 
           card.onclick = (e) => {
-            // Trigger button shake animation
             card.classList.add('animate-shake');
             setTimeout(() => card.classList.remove('animate-shake'), 420);
 
@@ -556,7 +514,6 @@
             if (isUnlocked || (this.currentUser && !this.currentUser.isAnonymous)) {
               urlDisplay = `<span class="text-emerald-600 font-bold">Tautan Tersedia</span>`;
             } else {
-              // Masked URL display
               const masked = item.driveUrl.length > 20 ? item.driveUrl.substring(0, 18) + '...' : item.driveUrl;
               urlDisplay = `<span class="text-amber-600 font-mono font-medium">Locked: ${masked}</span>`;
             }
@@ -581,7 +538,6 @@
           container.appendChild(card);
         });
 
-        // Update progress bar
         const progressText = document.getElementById('sidebar-progress-text');
         const progressBar = document.getElementById('sidebar-progress-bar');
         if (progressText && progressBar) {
@@ -593,19 +549,15 @@
         lucide.createIcons();
       }
 
-      filterInstruments() {
-        this.render();
-      }
-
       handleAuthClick() {
         if (this.currentUser && !this.currentUser.isAnonymous) {
           if (confirm("Apakah Anda ingin keluar dari sesi Admin?")) {
-            if (!IS_PREVIEW) {
-              signOut(auth);
-            } else {
+            signOut(auth).then(() => {
               this.currentUser = null;
-            }
-            this.setupUI();
+              this.setupUI();
+            }).catch(e => {
+              console.error("Sign out error:", e);
+            });
           }
         } else {
           document.getElementById('auth-modal').classList.remove('hidden');
@@ -625,20 +577,6 @@
         if (!email || !pass) {
           errEl.innerText = "Email dan password wajib diisi.";
           errEl.classList.remove('hidden');
-          return;
-        }
-
-        if (IS_PREVIEW) {
-          // Demo Admin Login in Preview Mode
-          if (email === "admin@sekolah.sch.id" && pass === "admin123") {
-            this.currentUser = { uid: "demo-admin", email: email, isAnonymous: false };
-            this.closeAuthModal();
-            this.setupUI();
-            alert("Berhasil masuk sebagai Admin (Mode Preview)!");
-          } else {
-            errEl.innerText = "Email atau password demo salah. Gunakan admin@sekolah.sch.id / admin123";
-            errEl.classList.remove('hidden');
-          }
           return;
         }
 
@@ -740,14 +678,6 @@
       }
 
       async persistData() {
-        if (IS_PREVIEW) {
-          localStorage.setItem('smpn3_portal_data', JSON.stringify({
-            instruments: this.instruments,
-            profilePhoto: this.profilePhoto
-          }));
-          return;
-        }
-
         try {
           const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_state');
           await setDoc(docRef, {
@@ -762,7 +692,6 @@
 
     const appInstance = new PortalApp();
     window.app = {
-      filterInstruments: () => appInstance.filterInstruments(),
       handleAuthClick: () => appInstance.handleAuthClick(),
       closeAuthModal: () => appInstance.closeAuthModal(),
       executeLogin: () => appInstance.executeLogin(),
