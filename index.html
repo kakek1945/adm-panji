@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Portal Instrumen Penilaian - Panji Hidayat (SMPN 3 Merbau)</title>
+  <title>Portal Administrasi Pembelajaran - Panji Hidayat (SMPN 3 Merbau)</title>
 
   <!-- PWA Manifest Single-File Data URI -->
   <link rel="manifest" href='data:application/manifest+json,{"name":"Portal Guru Panji","short_name":"PortalGuru","start_url":".","display":"standalone","background_color":"#FAF9F6","theme_color":"#111827","icons":[{"src":"https://placehold.co/192x192/111827/FFFFFF?text=PH","sizes":"192x192","type":"image/png"}]}' />
@@ -119,13 +119,6 @@
       animation: buttonShake 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
     }
 
-    .glass-nav {
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-top: 1px solid rgba(0, 0, 0, 0.06);
-    }
-
     ::-webkit-scrollbar {
       width: 4px;
       height: 4px;
@@ -155,6 +148,7 @@
         </div>
 
         <div class="flex items-center gap-2">
+          <!-- Tombol kelola waktu massal (Hanya muncul saat admin login) -->
           <button id="top-manage-btn" onclick="window.app.handleTopManageClick()" class="hidden p-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold transition-all" title="Atur Massal & Waktu Buka">
             <i data-lucide="clock" class="w-4 h-4"></i>
           </button>
@@ -179,7 +173,7 @@
               <div class="w-24 h-24 rounded-full p-1 bg-white shadow-md border-2 border-slate-200 overflow-hidden mx-auto">
                 <img
                   id="teacher-profile-photo"
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300"
+                  src="https://i.ibb.co.com/TMNxsDsv/foto.jpg"
                   alt="Panji Hidayat"
                   class="w-full h-full object-cover rounded-full"
                   onerror="this.src='https://placehold.co/200x200/111827/FFFFFF?text=Panji'"
@@ -220,8 +214,8 @@
               </a>
             </div>
 
-            <!-- Progress Bar Widget -->
-            <div class="mt-3.5 pt-3 border-t border-slate-100 w-full text-left">
+            <!-- Progress Bar Widget (Hanya tampil jika admin login) -->
+            <div id="admin-progress-widget" class="hidden mt-3.5 pt-3 border-t border-slate-100 w-full text-left">
               <div class="flex items-center justify-between text-[11px] font-bold mb-1">
                 <span class="text-slate-500">Kelengkapan Link Drive</span>
                 <span id="sidebar-progress-text" class="text-emerald-600">0/29</span>
@@ -244,206 +238,121 @@
                 class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-900 font-medium shadow-sm"
               />
             </div>
-
-            <!-- Horizontal Category Pills -->
-            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-              <button onclick="window.app.setCategory('ALL')" data-cat="ALL" class="cat-pill px-3 py-1.5 rounded-xl text-[11px] font-extrabold whitespace-nowrap transition-all bg-slate-900 text-white shadow-sm">
-                Semua (29)
-              </button>
-              <button onclick="window.app.setCategory('Perencanaan Waktu')" data-cat="Perencanaan Waktu" class="cat-pill px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all bg-white text-slate-600 border border-slate-200">
-                Program & Kalender
-              </button>
-              <button onclick="window.app.setCategory('Kurikulum & RPP')" data-cat="Kurikulum & RPP" class="cat-pill px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all bg-white text-slate-600 border border-slate-200">
-                CP, ATP & RPP
-              </button>
-              <button onclick="window.app.setCategory('Pelaksanaan & Jurnal')" data-cat="Pelaksanaan & Jurnal" class="cat-pill px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all bg-white text-slate-600 border border-slate-200">
-                Jurnal & Absensi
-              </button>
-              <button onclick="window.app.setCategory('Asesmen & Inovasi')" data-cat="Asesmen & Inovasi" class="cat-pill px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all bg-white text-slate-600 border border-slate-200">
-                Asesmen & Portofolio
-              </button>
-            </div>
           </div>
 
-          <!-- INSTRUMENTS STACK (Vertical 1-29 Feed) -->
-          <div id="instruments-grid" class="space-y-3"></div>
-        </section>
-
-        <!-- VIEW 2: STATS & READINESS -->
-        <section id="view-stats" class="hidden space-y-4">
-          <div class="pin-card p-4 space-y-3">
-            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Statistik Kesiapan Berkas</h3>
-            <div class="grid grid-cols-3 gap-2 text-center">
-              <div class="p-3 rounded-xl bg-slate-50">
-                <span class="text-[10px] text-slate-400 font-bold block">Total</span>
-                <span id="stat-total-count" class="text-lg font-extrabold text-slate-900">29</span>
-              </div>
-              <div class="p-3 rounded-xl bg-emerald-50">
-                <span class="text-[10px] text-emerald-600 font-bold block">Siap</span>
-                <span id="stat-ready-count" class="text-lg font-extrabold text-emerald-600">0</span>
-              </div>
-              <div class="p-3 rounded-xl bg-amber-50">
-                <span class="text-[10px] text-amber-600 font-bold block">Kosong</span>
-                <span id="stat-empty-count" class="text-lg font-extrabold text-amber-600">0</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="pin-card p-4">
-            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-3">Kelengkapan per Kategori</h3>
-            <div id="category-breakdown-list" class="space-y-3 text-xs"></div>
+          <!-- INSTRUMENTS LIST CONTAINER -->
+          <div id="instruments-container" class="space-y-2.5 pb-4">
+            <!-- Rendered by JS -->
           </div>
         </section>
 
-        <!-- VIEW 3: MANAGE DRIVE LINKS & BULK TIME-LOCK (Admin Only) -->
-        <section id="view-manage" class="hidden space-y-4">
-          <div class="pin-card p-4 space-y-4">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Pengaturan Waktu & Jadwal Massal</h3>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700">Admin Mode</span>
+        <!-- VIEW 2: ADMIN / SETTINGS PANEL (Hanya muncul untuk Admin) -->
+        <section id="view-settings" class="space-y-4 hidden">
+          <div class="pin-card p-4 bg-white space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 class="text-xs font-extrabold text-slate-900 flex items-center gap-2">
+                <i data-lucide="settings" class="w-4 h-4 text-blue-600"></i>
+                Panel Pengaturan Admin & Waktu
+              </h3>
+              <button onclick="window.app.switchView('microsite')" class="text-slate-400 hover:text-slate-700">
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
             </div>
-            
-            <!-- Pengaturan Jadwal Buka Massal -->
-            <div class="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200/60 space-y-2 text-xs">
-              <label class="block font-bold text-amber-900">Jadwal Buka Akses Massal (Semua Instrumen)</label>
-              <p class="text-[10px] text-stone-600">Atur satu waktu buka akses yang akan berlaku serentak untuk seluruh 29 instrumen.</p>
-              <div class="flex items-center gap-2 pt-1">
-                <input type="datetime-local" id="bulk-open-time" class="w-full px-3 py-2 rounded-xl bg-white border border-amber-300 font-medium text-xs" />
-                <button onclick="window.app.applyBulkTime()" class="px-4 py-2 rounded-xl bg-amber-700 text-white font-bold text-xs whitespace-nowrap shadow-sm hover:bg-amber-800 transition">Terapkan Massal</button>
+
+            <!-- Global Schedule Setting -->
+            <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100 space-y-2">
+              <label class="block text-[11px] font-extrabold text-blue-900">Atur Waktu Buka Massal Semua Link</label>
+              <div class="flex gap-2">
+                <input type="datetime-local" id="global-unlock-time" class="flex-1 px-3 py-2 bg-white border border-blue-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-600" />
+                <button onclick="window.app.applyGlobalUnlockTime()" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm">
+                  Terapkan
+                </button>
+              </div>
+              <p class="text-[10px] text-blue-700/80">Jika diatur, seluruh link instrumen hanya dapat dibuka publik setelah waktu tersebut tiba.</p>
+            </div>
+
+            <!-- Profile Customization -->
+            <div class="space-y-2 pt-2 border-t border-slate-100">
+              <label class="block text-[11px] font-extrabold text-slate-900">Ubah URL Foto Profil Guru</label>
+              <div class="flex gap-2">
+                <input type="text" id="input-profile-photo" placeholder="https://..." class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-slate-900" />
+                <button onclick="window.app.saveProfilePhoto()" class="px-3 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold shadow-sm">
+                  Simpan
+                </button>
               </div>
             </div>
 
-            <div class="pt-2">
-              <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-3">Kelola Tautan Google Drive Per Item</h4>
-              <div class="space-y-3" id="manage-links-container"></div>
+            <!-- List to Edit Drive URLs -->
+            <div class="space-y-3 pt-2 border-t border-slate-100">
+              <h4 class="text-[11px] font-extrabold text-slate-900">Daftar Link Google Drive Instrumen (1-29)</h4>
+              <div id="admin-instruments-edit-list" class="space-y-2.5 max-h-[350px] overflow-y-auto pr-1">
+                <!-- Dynamic inputs -->
+              </div>
+              <button onclick="window.app.saveAllDriveLinks()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold shadow-sm transition-all">
+                Simpan Semua Tautan Drive
+              </button>
             </div>
-          </div>
-        </section>
-
-        <!-- VIEW 4: SETTINGS & PROFILE (Admin Only) -->
-        <section id="view-settings" class="hidden space-y-4">
-          <div class="pin-card p-4 space-y-3">
-            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Pengaturan Identitas & Profil (Admin)</h3>
-            <form onsubmit="window.app.savePortalSettings(event)" class="space-y-2.5 text-xs">
-              <div>
-                <label class="block font-bold text-slate-600 mb-1">Nama Guru & Gelar</label>
-                <input type="text" id="set-teacher-name" required class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-medium" />
-              </div>
-              <div>
-                <label class="block font-bold text-slate-600 mb-1">Jabatan / Instansi</label>
-                <input type="text" id="set-teacher-role-input" required class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-medium" />
-              </div>
-              <div>
-                <label class="block font-bold text-slate-600 mb-1">Nama Sekolah / Instansi</label>
-                <input type="text" id="set-school-name" required class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-medium" />
-              </div>
-              <div>
-                <label class="block font-bold text-slate-600 mb-1">URL Foto Profil (Link Gambar)</label>
-                <input type="url" id="set-photo-url" placeholder="https://..." class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-medium" />
-              </div>
-              <div>
-                <label class="block font-bold text-slate-600 mb-1">URL Logo Sekolah / Instansi</label>
-                <input type="url" id="set-logo-url" placeholder="https://..." class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-medium" />
-              </div>
-              <div>
-                <label class="block font-bold text-slate-600 mb-1">Nomor WhatsApp Diskusi Admin</label>
-                <input type="text" id="set-wa-number" placeholder="628123456789" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 font-medium" />
-              </div>
-              <button type="submit" class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-bold shadow-sm">Simpan Perubahan Profil</button>
-            </form>
           </div>
         </section>
 
       </div>
 
-      <!-- BOTTOM NAVIGATION BAR -->
-      <nav class="glass-nav absolute bottom-0 left-0 right-0 h-16 flex items-center justify-around px-2 z-30">
-        <button onclick="window.app.switchTab('microsite')" id="nav-btn-microsite" class="flex flex-col items-center justify-center p-2 text-slate-900 font-bold transition-all">
-          <i data-lucide="grid" class="w-5 h-5"></i>
-          <span class="text-[9px] mt-0.5">Instrumen</span>
+      <!-- BOTTOM NAVIGATION BAR (Hanya tampil jika admin login) -->
+      <nav id="admin-bottom-nav" class="hidden absolute bottom-0 left-0 right-0 glass-nav px-6 py-3 flex items-center justify-around z-30">
+        <button onclick="window.app.switchView('microsite')" id="nav-btn-home" class="flex flex-col items-center gap-1 text-slate-900 font-extrabold transition-all">
+          <i data-lucide="compass" class="w-5 h-5"></i>
+          <span class="text-[10px]">Portal</span>
         </button>
-        <button onclick="window.app.switchTab('stats')" id="nav-btn-stats" class="flex flex-col items-center justify-center p-2 text-slate-400 font-semibold transition-all">
-          <i data-lucide="pie-chart" class="w-5 h-5"></i>
-          <span class="text-[9px] mt-0.5">Kesiapan</span>
-        </button>
-        <button id="nav-btn-manage" onclick="window.app.handleNavManageClick()" class="flex flex-col items-center justify-center p-2 text-slate-400 font-semibold transition-all">
-          <i data-lucide="clock" class="w-5 h-5"></i>
-          <span id="nav-label-manage" class="text-[9px] mt-0.5">Atur Waktu</span>
-        </button>
-        <button id="nav-btn-settings" onclick="window.app.handleNavSettingsClick()" class="flex flex-col items-center justify-center p-2 text-slate-400 font-semibold transition-all">
-          <i data-lucide="settings" class="w-5 h-5"></i>
-          <span id="nav-label-settings" class="text-[9px] mt-0.5">Login</span>
+        <button onclick="window.app.switchView('settings')" id="nav-btn-settings" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-bold transition-all">
+          <i data-lucide="sliders" class="w-5 h-5"></i>
+          <span class="text-[10px]">Atur Waktu & Link</span>
         </button>
       </nav>
 
     </div>
   </div>
 
-  <!-- MODAL EDIT SINGLE LINK (Admin) -->
-  <div id="modal-edit-link" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <span id="modal-edit-no" class="px-2.5 py-1 rounded-xl bg-slate-900 text-white font-extrabold text-xs">#1</span>
-        <button onclick="window.app.closeEditModal()" class="text-slate-400 hover:text-slate-600">
-          <i data-lucide="x" class="w-5 h-5"></i>
+  <!-- AUTH MODAL -->
+  <div id="auth-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 relative animate-in fade-in zoom-in duration-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+          <i data-lucide="shield-check" class="w-4 h-4 text-slate-900"></i>
+          <span>Autentikasi Admin</span>
+        </h3>
+        <button onclick="window.app.closeAuthModal()" class="text-slate-400 hover:text-slate-700 p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
-      <div>
-        <p id="modal-instrument-title" class="text-xs font-bold text-slate-800 bg-slate-50 p-3 rounded-xl border border-slate-200"></p>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Email Admin</label>
+          <input type="email" id="auth-email" placeholder="admin@sekolah.sch.id" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 font-medium focus:outline-none focus:border-slate-900" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-extrabold text-slate-700 mb-1">Password</label>
+          <input type="password" id="auth-password" placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 font-medium focus:outline-none focus:border-slate-900" />
+        </div>
+        <div id="auth-error-msg" class="text-[11px] text-rose-600 font-bold hidden"></div>
+        <button onclick="window.app.executeLogin()" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold shadow-sm transition-all">
+          Masuk Dashboard Admin
+        </button>
       </div>
-      <form onsubmit="window.app.submitSingleLink(event)" class="space-y-3 text-xs">
-        <input type="hidden" id="modal-instrument-no" />
-        <div>
-          <label class="block font-bold text-slate-600 mb-1">URL Google Drive</label>
-          <input type="url" id="modal-instrument-url" placeholder="https://drive.google.com/..." class="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-medium" />
-        </div>
-        <div>
-          <label class="block font-bold text-slate-600 mb-1">Jadwal Buka Akses (Waktu)</label>
-          <input type="datetime-local" id="modal-instrument-time" class="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-medium" />
-          <p class="text-[10px] text-slate-400 mt-1">Jika dikosongkan, tautan akan langsung dapat dibuka kapan saja.</p>
-        </div>
-        <button type="submit" class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-bold">Simpan Tautan & Waktu</button>
-      </form>
     </div>
   </div>
 
-  <!-- MODAL LOGIN ADMIN (FIREBASE AUTH) -->
-  <div id="modal-login" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <h4 class="font-extrabold text-slate-900 text-sm">Autentikasi Admin</h4>
-        <button onclick="window.app.closeLoginModal()" class="text-slate-400 hover:text-slate-600">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-      <form onsubmit="window.app.handleLogin(event)" class="space-y-3 text-xs">
-        <div>
-          <label class="block font-bold mb-1">Email Admin</label>
-          <input type="email" id="login-email" required placeholder="admin@sekolah.sch.id" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200" />
-        </div>
-        <div>
-          <label class="block font-bold mb-1">Password</label>
-          <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200" />
-        </div>
-        <button type="submit" class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-bold">Masuk Sebagai Admin</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- TOAST CONTAINER -->
-  <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100000] flex flex-col gap-2 max-w-xs w-full pointer-events-none px-4"></div>
-
-  <!-- FIREBASE SDK & APP INITIALIZATION SCRIPT -->
+  <!-- FIREBASE & APPLICATION LOGIC SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // -------------------------------------------------------------------------
-    // KONFIGURASI FIREBASE ANDA
-    // -------------------------------------------------------------------------
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-       apiKey: "AIzaSyBwPUft7vLimwrZ9IigxhDdqDzRA6qgpBA",
+    // KONFIGURASI APLIKASI
+    const IS_PREVIEW = true; // Ubah ke false saat deploy produksi dengan Firebase nyata
+
+    const defaultFirebaseConfig = {
+    apiKey: "AIzaSyBwPUft7vLimwrZ9IigxhDdqDzRA6qgpBA",
   authDomain: "adm-panji.firebaseapp.com",
   projectId: "adm-panji",
   storageBucket: "adm-panji.firebasestorage.app",
@@ -451,561 +360,423 @@
   appId: "1:733622558355:web:e87736a24e5190ed15b766"
     };
 
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'portal-smpn3-merbau';
-    
-    let app, db, auth;
-    let isFirebaseReady = false;
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : defaultFirebaseConfig;
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'portal-smpn3-merbau-2026';
 
+    let app, auth, db;
     try {
       app = initializeApp(firebaseConfig);
-      db = getFirestore(app);
       auth = getAuth(app);
-      isFirebaseReady = true;
+      db = getFirestore(app);
     } catch(e) {
-      console.log("Firebase not fully configured. Running in offline/local state.");
+      console.warn("Firebase init warning:", e);
     }
 
-    const BASE_INSTRUMENTS_CATALOG = [
-      { no: 1,  category: "Perencanaan Waktu",     title: "Program Tahunan", driveUrl: "", openTime: "" },
-      { no: 2,  category: "Perencanaan Waktu",     title: "Program Semester", driveUrl: "", openTime: "" },
-      { no: 3,  category: "Perencanaan Waktu",     title: "Kalender Pendidikan", driveUrl: "", openTime: "" },
-      { no: 4,  category: "Perencanaan Waktu",     title: "Analisis Minggu Efektif", driveUrl: "", openTime: "" },
-      { no: 5,  category: "Perencanaan Waktu",     title: "Analisis Hari Efektif", driveUrl: "", openTime: "" },
-      { no: 6,  category: "Perencanaan Waktu",     title: "Jadwal Tatap Muka", driveUrl: "", openTime: "" },
-      { no: 7,  category: "Kurikulum & RPP",       title: "Capaian Pembelajaran ( CP )", driveUrl: "", openTime: "" },
-      { no: 8,  category: "Kurikulum & RPP",       title: "Alur Tujuan Pembelajaran (ATP)", driveUrl: "", openTime: "" },
-      { no: 9,  category: "Kurikulum & RPP",       title: "Dokumen KKTP", driveUrl: "", openTime: "" },
-      { no: 10, category: "Kurikulum & RPP",       title: "Perencanaan Pembelajaran fokus ke Literasi", driveUrl: "", openTime: "" },
-      { no: 11, category: "Kurikulum & RPP",       title: "Perencanaan Pembelajaran fokus di Numerasi", driveUrl: "", openTime: "" },
-      { no: 12, category: "Kurikulum & RPP",       title: "Perencanaan Pembelajaran (C1 sampai C3)", driveUrl: "", openTime: "" },
-      { no: 13, category: "Kurikulum & RPP",       title: "Perencanaan Pembelajaran (C4 sampai C6)", driveUrl: "", openTime: "" },
-      { no: 14, category: "Kurikulum & RPP",       title: "Perencanaan Pembelajaran (C1 sampai C6)", driveUrl: "", openTime: "" },
-      { no: 15, category: "Kurikulum & RPP",       title: "Model Pembelajaran PBL, PJBL, Inquiri, Kolaboratif", driveUrl: "", openTime: "" },
-      { no: 16, category: "Kurikulum & RPP",       title: "Perencanaan Pembelajaran berdiferensiasi", driveUrl: "", openTime: "" },
-      { no: 17, category: "Pelaksanaan & Jurnal",  title: "Batas Pelajaran", driveUrl: "", openTime: "" },
-      { no: 18, category: "Pelaksanaan & Jurnal",  title: "Jurnal Refleksi Pembelajaran", driveUrl: "", openTime: "" },
-      { no: 19, category: "Pelaksanaan & Jurnal",  title: "Absensi Murid", driveUrl: "", openTime: "" },
-      { no: 20, category: "Asesmen & Inovasi",     title: "Dokumen Asesmen Awal", driveUrl: "", openTime: "" },
-      { no: 21, category: "Pelaksanaan & Jurnal",  title: "Dokumen Data Murid Dukungan Khusus", driveUrl: "", openTime: "" },
-      { no: 22, category: "Pelaksanaan & Jurnal",  title: "Program Pendampingan Khusus", driveUrl: "", openTime: "" },
-      { no: 23, category: "Asesmen & Inovasi",     title: "Dokumen Asesmen Formatif (Daftar Nilai)", driveUrl: "", openTime: "" },
-      { no: 24, category: "Asesmen & Inovasi",     title: "Dokumen Asesmen Sumatif (Daftar Nilai)", driveUrl: "", openTime: "" },
-      { no: 25, category: "Asesmen & Inovasi",     title: "Dokumen Panduan Pembelajaran & Asesmen Revisi 2025", driveUrl: "", openTime: "" },
-      { no: 26, category: "Asesmen & Inovasi",     title: "Dokumen Portofolio Murid", driveUrl: "", openTime: "" },
-      { no: 27, category: "Asesmen & Inovasi",     title: "Program Remedial", driveUrl: "", openTime: "" },
-      { no: 28, category: "Asesmen & Inovasi",     title: "Program Pengayaan", driveUrl: "", openTime: "" },
-      { no: 29, category: "Asesmen & Inovasi",     title: "Karya Inovasi Pembelajaran", driveUrl: "", openTime: "" }
+    // 29 Perangkat Pembelajaran Guru (Nomor 1 s/d 29)
+    const BASE_INSTRUMENTS = [
+      { no: 1, title: "Program Tahunan", driveUrl: "", unlockTime: "" },
+      { no: 2, title: "Program Semester", driveUrl: "", unlockTime: "" },
+      { no: 3, title: "Kalender Pendidikan", driveUrl: "", unlockTime: "" },
+      { no: 4, title: "Analisis Minggu Efektif", driveUrl: "", unlockTime: "" },
+      { no: 5, title: "Analisis Hari Efektif", driveUrl: "", unlockTime: "" },
+      { no: 6, title: "Jadwal Tatap Muka", driveUrl: "", unlockTime: "" },
+      { no: 7, title: "Capaian Pembelajaran ( CP )", driveUrl: "", unlockTime: "" },
+      { no: 8, title: "Alur Tujuan Pembelajaran (ATP)", driveUrl: "", unlockTime: "" },
+      { no: 9, title: "Dokumen KKTP", driveUrl: "", unlockTime: "" },
+      { no: 10, title: "Perencanaan Pembelajaran fokus ke Literasi", driveUrl: "", unlockTime: "" },
+      { no: 11, title: "Perencanaan Pembelajaran fokus di Numerasi", driveUrl: "", unlockTime: "" },
+      { no: 12, title: "Perencanaan Pembelajaran Yang kegiatannya mengimplementasikan Kemampuan berpikir Murid C1 sampai C3", driveUrl: "", unlockTime: "" },
+      { no: 13, title: "Perencanaan Pembelajaran Yang kegiatannya mengimplementasikan Kemampuan berpikir murid C4 sampai C6", driveUrl: "", unlockTime: "" },
+      { no: 14, title: "Perencanaan Pembelajaran Yang kegiatannya mengimplementasikan Kemampuan berpikir murid C1 sampai C6", driveUrl: "", unlockTime: "" },
+      { no: 15, title: "Perencanaan Pembelajaran Yang kegiatannya mengimplementasikan Model pembelajaran PBL, PJBL, Inquiri, Kolaboratif", driveUrl: "", unlockTime: "" },
+      { no: 16, title: "Perencanaan Pembelajaran berdiferensiasi", driveUrl: "", unlockTime: "" },
+      { no: 17, title: "Batas Pelajaran", driveUrl: "", unlockTime: "" },
+      { no: 18, title: "Jurnal Refleksi Pembelajaran", driveUrl: "", unlockTime: "" },
+      { no: 19, title: "Absensi Murid", driveUrl: "", unlockTime: "" },
+      { no: 20, title: "Dokumen Asesmen Awal", driveUrl: "", unlockTime: "" },
+      { no: 21, title: "Dokumen Data Murid yang membutuhkan dukungan khusus", driveUrl: "", unlockTime: "" },
+      { no: 22, title: "Program Pendampingan Murid yang membutuhkan dukungan khusus", driveUrl: "", unlockTime: "" },
+      { no: 23, title: "Dokumen Asesmen Formatif (Daftar Nilai)", driveUrl: "", unlockTime: "" },
+      { no: 24, title: "Dokumen Asesmen Sumatif (Daftar Nilai)", driveUrl: "", unlockTime: "" },
+      { no: 25, title: "Dokumen Panduan Pembelajaran dan asesmen Edisi Revisi 2025", driveUrl: "", unlockTime: "" },
+      { no: 26, title: "Dokumen Portofolio Murid", driveUrl: "", unlockTime: "" },
+      { no: 27, title: "Program Remedial", driveUrl: "", unlockTime: "" },
+      { no: 28, title: "Program Pengayaan", driveUrl: "", unlockTime: "" },
+      { no: 29, title: "Mempunyai Karya Inovasi pembelajaran yang berasal dari Jurnal Refleksi", driveUrl: "", unlockTime: "" }
     ];
 
-    const state = {
-      currentTab: 'microsite',
-      selectedCategory: 'ALL',
-      searchQuery: '',
-      isAdminLoggedIn: false,
-      portalConfig: {
-        teacherName: "Panji Hidayat",
-        teacherRole: "Guru Informatika • SMP Negeri 3 Merbau",
-        schoolName: "SMP Negeri 3 Merbau",
-        photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300",
-        logoUrl: "https://i.ibb.co.com/fVTzR5H6/logo.png",
-        whatsappNumber: "6281234567890"
-      },
-      instruments: JSON.parse(JSON.stringify(BASE_INSTRUMENTS_CATALOG))
-    };
-
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toast-container');
-      if (!container) return;
-      const colors = {
-        success: 'bg-emerald-600 text-white',
-        warning: 'bg-amber-500 text-white',
-        error: 'bg-rose-600 text-white',
-        info: 'bg-slate-900 text-white'
-      };
-      const toast = document.createElement('div');
-      toast.className = `pointer-events-auto px-4 py-2.5 rounded-xl shadow-xl text-xs font-bold text-center ${colors[type] || colors.info}`;
-      toast.textContent = message;
-      container.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
-    }
-
-    function openLoginModal() {
-      const modal = document.getElementById('modal-login');
-      if (modal) modal.classList.remove('hidden');
-    }
-
-    function closeLoginModal() {
-      const modal = document.getElementById('modal-login');
-      if (modal) modal.classList.add('hidden');
-    }
-
-    function openEditModal(no) {
-      if (!state.isAdminLoggedIn) {
-        showToast("Akses ditolak. Silakan login sebagai Admin terlebih dahulu.", "error");
-        openLoginModal();
-        return;
+    class PortalApp {
+      constructor() {
+        this.currentUser = null;
+        this.instruments = JSON.parse(JSON.stringify(BASE_INSTRUMENTS));
+        this.profilePhoto = "https://i.ibb.co.com/TMNxsDsv/foto.jpg";
+        this.currentView = 'microsite';
+        this.initAuth();
+        this.initData();
       }
-      const item = state.instruments.find(i => i.no === no);
-      if (!item) return;
-      document.getElementById('modal-instrument-no').value = no;
-      document.getElementById('modal-edit-no').textContent = `#${no}`;
-      document.getElementById('modal-instrument-title').textContent = item.title;
-      document.getElementById('modal-instrument-url').value = item.driveUrl || '';
-      document.getElementById('modal-instrument-time').value = item.openTime || '';
-      document.getElementById('modal-edit-link').classList.remove('hidden');
-    }
 
-    function closeEditModal() {
-      document.getElementById('modal-edit-link').classList.add('hidden');
-    }
-
-    async function initApp() {
-      if (isFirebaseReady) {
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            state.isAdminLoggedIn = true;
-          } else {
-            state.isAdminLoggedIn = false;
-          }
-          renderAll();
-        });
+      async initAuth() {
+        if (IS_PREVIEW) {
+          // Demo Mode state
+          this.setupUI();
+          return;
+        }
 
         try {
-          const settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_settings');
-          onSnapshot(settingsRef, (docSnap) => {
-            if (docSnap.exists()) {
-              state.portalConfig = { ...state.portalConfig, ...docSnap.data() };
-              renderAll();
-            } else {
-              setDoc(settingsRef, state.portalConfig).catch(() => {});
-            }
-          }, (err) => console.log(err));
-
-          const instrumentsRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_instruments');
-          onSnapshot(instrumentsRef, (docSnap) => {
-            if (docSnap.exists() && docSnap.data().list) {
-              state.instruments = docSnap.data().list;
-              renderAll();
-            } else {
-              setDoc(instrumentsRef, { list: BASE_INSTRUMENTS_CATALOG }).catch(() => {});
-            }
-          }, (err) => console.log(err));
-        } catch (e) {
-          console.log("Firestore sync skipped:", e);
-        }
-      } else {
-        renderAll();
-      }
-    }
-
-    async function saveToFirestore() {
-      if (!isFirebaseReady || !state.isAdminLoggedIn) return;
-      try {
-        const instrumentsRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_instruments');
-        await setDoc(instrumentsRef, { list: state.instruments });
-        const settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_settings');
-        await setDoc(settingsRef, state.portalConfig);
-      } catch (e) {
-        console.error("Error saving to Firestore:", e);
-      }
-    }
-
-    function renderAll() {
-      document.getElementById('header-teacher-name').textContent = state.portalConfig.teacherName;
-      document.getElementById('header-school-subtitle').textContent = state.portalConfig.schoolName;
-      document.getElementById('header-teacher-role').textContent = state.portalConfig.teacherRole || `Guru Informatika • ${state.portalConfig.schoolName}`;
-      
-      const logoImg = document.getElementById('header-logo-img');
-      if (state.portalConfig.logoUrl) {
-        logoImg.src = state.portalConfig.logoUrl;
-      }
-
-      const profilePhoto = document.getElementById('teacher-profile-photo');
-      if (state.portalConfig.photoUrl) {
-        profilePhoto.src = state.portalConfig.photoUrl;
-      }
-
-      const waBtn = document.getElementById('btn-admin-wa');
-      if (waBtn) {
-        waBtn.href = `https://wa.me/${state.portalConfig.whatsappNumber}?text=Halo%20Admin,%20saya%20ingin%20berdiskusi%20mengenai%20Portal%20Administrasi%20Pembelajaran%20${encodeURIComponent(state.portalConfig.schoolName)}.`;
-      }
-
-      document.getElementById('set-teacher-name').value = state.portalConfig.teacherName;
-      document.getElementById('set-teacher-role-input').value = state.portalConfig.teacherRole || "Guru Informatika • SMP Negeri 3 Merbau";
-      document.getElementById('set-school-name').value = state.portalConfig.schoolName;
-      document.getElementById('set-photo-url').value = state.portalConfig.photoUrl;
-      document.getElementById('set-logo-url').value = state.portalConfig.logoUrl;
-      document.getElementById('set-wa-number').value = state.portalConfig.whatsappNumber;
-
-      const topManageBtn = document.getElementById('top-manage-btn');
-      const heroCameraBtn = document.getElementById('hero-camera-btn');
-      const authBtn = document.getElementById('btn-auth-action');
-      const navManageLabel = document.getElementById('nav-label-manage');
-      const navSettingsLabel = document.getElementById('nav-label-settings');
-
-      if (state.isAdminLoggedIn) {
-        topManageBtn.classList.remove('hidden');
-        heroCameraBtn.classList.remove('hidden');
-        authBtn.textContent = "Keluar";
-        authBtn.className = "px-3 py-1.5 rounded-xl bg-rose-600 text-white text-[11px] font-extrabold shadow-sm";
-        navManageLabel.textContent = "Atur Waktu";
-        navSettingsLabel.textContent = "Profil";
-      } else {
-        topManageBtn.classList.add('hidden');
-        heroCameraBtn.classList.add('hidden');
-        authBtn.textContent = "Masuk Admin";
-        authBtn.className = "px-3 py-1.5 rounded-xl bg-slate-900 text-white text-[11px] font-extrabold shadow-sm";
-        navManageLabel.textContent = "Atur Waktu";
-        navSettingsLabel.textContent = "Login";
-      }
-
-      const total = state.instruments.length;
-      const ready = state.instruments.filter(i => i.driveUrl && i.driveUrl.trim() !== '').length;
-      const empty = total - ready;
-      const pct = Math.round((ready / total) * 100);
-
-      document.getElementById('sidebar-progress-text').textContent = `${ready}/${total} (${pct}%)`;
-      document.getElementById('sidebar-progress-bar').style.width = `${pct}%`;
-      document.getElementById('stat-total-count').textContent = total;
-      document.getElementById('stat-ready-count').textContent = ready;
-      document.getElementById('stat-empty-count').textContent = empty;
-
-      renderGrid();
-      renderManageList();
-      renderCategoryBreakdown();
-      if (window.lucide) window.lucide.createIcons();
-    }
-
-    function isLinkAccessible(item) {
-      if (!item.driveUrl || item.driveUrl.trim() === '') return false;
-      if (state.isAdminLoggedIn) return true; // Admin selalu bisa akses
-      if (!item.openTime || item.openTime === '') return true; // Jika tidak diset waktu, bebas diakses
-      
-      const now = new Date().getTime();
-      const openTime = new Date(item.openTime).getTime();
-      return now >= openTime;
-    }
-
-    function formatTimeLabel(timeStr) {
-      if (!timeStr) return '';
-      const d = new Date(timeStr);
-      return d.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
-    }
-
-    function renderGrid() {
-      const grid = document.getElementById('instruments-grid');
-      if (!grid) return;
-
-      const q = state.searchQuery.toLowerCase();
-      const filtered = state.instruments.filter(item => {
-        const matchCat = state.selectedCategory === 'ALL' || item.category === state.selectedCategory;
-        const matchQ = !q || item.title.toLowerCase().includes(q) || String(item.no).includes(q);
-        return matchCat && matchQ;
-      });
-
-      if (filtered.length === 0) {
-        grid.innerHTML = `<div class="pin-card p-8 text-center text-xs text-slate-500 font-bold">Instrumen tidak ditemukan.</div>`;
-        return;
-      }
-
-      grid.innerHTML = filtered.map(item => {
-        const hasLink = Boolean(item.driveUrl && item.driveUrl.trim() !== '');
-        const accessible = isLinkAccessible(item);
-        
-        let urlDisplay = '';
-        if (hasLink) {
-          if (accessible) {
-            urlDisplay = `<span class="text-emerald-600 font-bold text-[10px]">Tautan Tersedia (Dibuka)</span>`;
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
           } else {
-            const maskedUrl = item.driveUrl.substring(0, Math.min(22, item.driveUrl.length)) + '... [Terkunci Waktu]';
-            urlDisplay = `<span class="text-amber-600 font-semibold text-[10px]" title="Dibuka pada: ${formatTimeLabel(item.openTime)}">🔒 ${maskedUrl} (Buka: ${formatTimeLabel(item.openTime)})</span>`;
+            await signInAnonymously(auth);
           }
-        } else {
-          urlDisplay = `<span class="text-slate-400 font-medium text-[10px]">Belum ada tautan</span>`;
+          onAuthStateChanged(auth, (user) => {
+            this.currentUser = user;
+            this.setupUI();
+          });
+        } catch(e) {
+          console.error("Auth init error:", e);
+          this.setupUI();
+        }
+      }
+
+      async initData() {
+        if (IS_PREVIEW) {
+          const localData = localStorage.getItem('smpn3_portal_data');
+          if (localData) {
+            try {
+              const parsed = JSON.parse(localData);
+              this.instruments = parsed.instruments || this.instruments;
+              this.profilePhoto = parsed.profilePhoto || this.profilePhoto;
+            } catch(e) {}
+          }
+          this.render();
+          return;
         }
 
-        return `
-          <div
-            id="instrument-card-${item.no}"
-            onclick="window.app.shakeAndOpen(${item.no})"
-            class="pin-card p-3.5 cursor-pointer flex items-center justify-between gap-3 group"
-          >
+        // Production Firestore sync
+        try {
+          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_state');
+          onSnapshot(docRef, (snap) => {
+            if (snap.exists()) {
+              const data = snap.data();
+              if (data.instruments) this.instruments = data.instruments;
+              if (data.profilePhoto) this.profilePhoto = data.profilePhoto;
+            }
+            this.render();
+          }, (err) => {
+            console.error("Firestore sync error:", err);
+            this.render();
+          });
+        } catch(e) {
+          this.render();
+        }
+      }
+
+      setupUI() {
+        const authBtn = document.getElementById('btn-auth-action');
+        const topManageBtn = document.getElementById('top-manage-btn');
+        const adminBottomNav = document.getElementById('admin-bottom-nav');
+        const heroCameraBtn = document.getElementById('hero-camera-btn');
+        const adminProgressWidget = document.getElementById('admin-progress-widget');
+
+        if (this.currentUser && !this.currentUser.isAnonymous) {
+          authBtn.innerText = "Keluar Admin";
+          authBtn.className = "px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold shadow-sm transition-all";
+          topManageBtn.classList.remove('hidden');
+          adminBottomNav.classList.remove('hidden');
+          heroCameraBtn.classList.remove('hidden');
+          adminProgressWidget.classList.remove('hidden');
+        } else {
+          authBtn.innerText = "Masuk Admin";
+          authBtn.className = "px-3 py-1.5 rounded-xl bg-slate-900 text-white text-[11px] font-extrabold shadow-sm transition-all";
+          topManageBtn.classList.add('hidden');
+          adminBottomNav.classList.add('hidden');
+          heroCameraBtn.classList.add('hidden');
+          adminProgressWidget.classList.add('hidden');
+          if (this.currentView === 'settings') {
+            this.switchView('microsite');
+          }
+        }
+
+        const photoEl = document.getElementById('teacher-profile-photo');
+        if (photoEl) photoEl.src = this.profilePhoto;
+
+        this.render();
+      }
+
+      render() {
+        const container = document.getElementById('instruments-container');
+        if (!container) return;
+
+        const searchTerm = (document.getElementById('search-instrument')?.value || "").toLowerCase();
+        container.innerHTML = '';
+
+        let filledCount = 0;
+        const now = new Date();
+
+        this.instruments.forEach((item) => {
+          if (item.driveUrl && item.driveUrl.trim() !== '') {
+            filledCount++;
+          }
+
+          if (searchTerm && !item.title.toLowerCase().includes(searchTerm) && !item.no.toString().includes(searchTerm)) {
+            return;
+          }
+
+          const card = document.createElement('div');
+          card.className = "pin-card p-3.5 flex items-center justify-between gap-3 cursor-pointer group";
+          
+          let isUnlocked = true;
+          if (item.unlockTime) {
+            const unlockDate = new Date(item.unlockTime);
+            if (now < unlockDate) {
+              isUnlocked = false;
+            }
+          }
+
+          card.onclick = (e) => {
+            // Trigger button shake animation
+            card.classList.add('animate-shake');
+            setTimeout(() => card.classList.remove('animate-shake'), 420);
+
+            setTimeout(() => {
+              if (!item.driveUrl || item.driveUrl.trim() === '') {
+                alert(`Tautan Google Drive untuk instrumen nomor ${item.no} belum tersedia.`);
+                return;
+              }
+              if (!isUnlocked && (!this.currentUser || this.currentUser.isAnonymous)) {
+                alert(`Maaf, link belum diizinkan untuk dilihat oleh admin. Jadwal buka: ${new Date(item.unlockTime).toLocaleString('id-ID')}`);
+                return;
+              }
+              window.open(item.driveUrl, '_blank');
+            }, 300);
+          };
+
+          let urlDisplay = '';
+          if (item.driveUrl) {
+            if (isUnlocked || (this.currentUser && !this.currentUser.isAnonymous)) {
+              urlDisplay = `<span class="text-emerald-600 font-bold">Tautan Tersedia</span>`;
+            } else {
+              // Masked URL display
+              const masked = item.driveUrl.length > 20 ? item.driveUrl.substring(0, 18) + '...' : item.driveUrl;
+              urlDisplay = `<span class="text-amber-600 font-mono font-medium">Locked: ${masked}</span>`;
+            }
+          } else {
+            urlDisplay = `<span class="text-slate-400">Belum ada tautan</span>`;
+          }
+
+          card.innerHTML = `
             <div class="flex items-center gap-3 min-w-0">
-              <span class="w-8 h-8 rounded-xl ${hasLink ? (accessible ? 'bg-slate-900 text-white' : 'bg-amber-600 text-white') : 'bg-slate-100 text-slate-600'} font-extrabold text-xs flex items-center justify-center shrink-0">
+              <div class="w-8 h-8 rounded-xl bg-slate-100 text-slate-800 font-extrabold text-xs flex items-center justify-center shrink-0 border border-slate-200/60 group-hover:bg-slate-900 group-hover:text-white transition-colors">
                 ${item.no}
-              </span>
+              </div>
               <div class="min-w-0">
-                <span class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400 block">${item.category}</span>
                 <h4 class="text-xs font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">${item.title}</h4>
-                <div class="mt-0.5 truncate">${urlDisplay}</div>
+                <p class="text-[10px] text-slate-500 mt-0.5 truncate">${urlDisplay}</p>
               </div>
             </div>
-
-            <div class="flex items-center gap-1.5 shrink-0">
-              ${state.isAdminLoggedIn ? `
-                <button
-                  onclick="event.stopPropagation(); openEditModal(${item.no})"
-                  class="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100"
-                  title="Atur Link & Waktu"
-                >
-                  <i data-lucide="clock" class="w-3.5 h-3.5"></i>
-                </button>
-              ` : ''}
-              <span class="w-7 h-7 rounded-lg ${hasLink ? (accessible ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600') : 'bg-slate-100 text-slate-400'} flex items-center justify-center">
-                <i data-lucide="${hasLink ? (accessible ? 'external-link' : 'lock') : 'alert-circle'}" class="w-3.5 h-3.5"></i>
-              </span>
+            <div class="w-7 h-7 rounded-xl bg-slate-50 group-hover:bg-slate-900 text-slate-400 group-hover:text-white flex items-center justify-center shrink-0 transition-all">
+              <i data-lucide="${isUnlocked ? 'external-link' : 'lock'}" class="w-3.5 h-3.5"></i>
             </div>
-          </div>
-        `;
-      }).join('');
-      if (window.lucide) window.lucide.createIcons();
-    }
+          `;
+          container.appendChild(card);
+        });
 
-    function shakeAndOpen(no) {
-      const card = document.getElementById(`instrument-card-${no}`);
-      const item = state.instruments.find(i => i.no === no);
-      if (!item) return;
+        // Update progress bar
+        const progressText = document.getElementById('sidebar-progress-text');
+        const progressBar = document.getElementById('sidebar-progress-bar');
+        if (progressText && progressBar) {
+          const pct = Math.round((filledCount / 29) * 100);
+          progressText.innerText = `${filledCount}/29`;
+          progressBar.style.width = `${pct}%`;
+        }
 
-      if (card) {
-        card.classList.remove('animate-shake');
-        void card.offsetWidth;
-        card.classList.add('animate-shake');
+        lucide.createIcons();
       }
 
-      setTimeout(() => {
-        if (!item.driveUrl || item.driveUrl.trim() === '') {
-          showToast(`Tautan Google Drive belum diatur oleh Admin.`, 'warning');
-          if (state.isAdminLoggedIn) {
-            openEditModal(no);
-          }
-          return;
-        }
-
-        if (isLinkAccessible(item)) {
-          showToast(`Membuka "${item.title}"...`, 'success');
-          window.open(item.driveUrl.trim(), '_blank');
-        } else {
-          showToast(`Akses belum diizinkan oleh admin! Link belum dapat dilihat (Dibuka pada ${formatTimeLabel(item.openTime)}).`, 'error');
-        }
-      }, 420);
-    }
-
-    function renderManageList() {
-      const container = document.getElementById('manage-links-container');
-      if (!container) return;
-
-      container.innerHTML = state.instruments.map(item => `
-        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2 text-xs">
-          <div class="flex items-center justify-between">
-            <span class="font-extrabold text-slate-900">#${item.no}. ${item.title}</span>
-            <span class="text-[10px] text-slate-400 font-semibold">${item.category}</span>
-          </div>
-          <div class="space-y-1.5">
-            <input type="url" id="manage-url-${item.no}" value="${item.driveUrl || ''}" placeholder="https://drive.google.com/..." class="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-[11px]" />
-            <div class="flex items-center gap-2">
-              <input type="datetime-local" id="manage-time-${item.no}" value="${item.openTime || ''}" class="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-[11px]" />
-              <button onclick="window.app.saveRow(${item.no})" class="px-3 py-1.5 rounded-lg bg-slate-900 text-white font-bold text-[11px] whitespace-nowrap">Simpan</button>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function renderCategoryBreakdown() {
-      const container = document.getElementById('category-breakdown-list');
-      if (!container) return;
-      const cats = ['Perencanaan Waktu', 'Kurikulum & RPP', 'Pelaksanaan & Jurnal', 'Asesmen & Inovasi'];
-      container.innerHTML = cats.map(cat => {
-        const items = state.instruments.filter(i => i.category === cat);
-        const done = items.filter(i => i.driveUrl && i.driveUrl.trim() !== '').length;
-        const pct = items.length > 0 ? Math.round((done / items.length) * 100) : 0;
-        return `
-          <div class="space-y-1">
-            <div class="flex justify-between font-bold text-slate-700">
-              <span>${cat}</span>
-              <span>${done}/${items.length} (${pct}%)</span>
-            </div>
-            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-              <div class="h-full bg-slate-900 rounded-full" style="width: ${pct}%"></div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    window.app = {
-      switchTab(tab) {
-        if ((tab === 'manage' || tab === 'settings') && !state.isAdminLoggedIn) {
-          showToast("Silakan login sebagai Admin untuk mengakses menu ini.", "warning");
-          openLoginModal();
-          return;
-        }
-        state.currentTab = tab;
-        ['microsite', 'stats', 'manage', 'settings'].forEach(t => {
-          document.getElementById(`view-${t}`).classList.toggle('hidden', t !== tab);
-          const btn = document.getElementById(`nav-btn-${t}`);
-          if (btn) {
-            btn.className = t === tab
-              ? 'flex flex-col items-center justify-center p-2 text-slate-900 font-bold transition-all'
-              : 'flex flex-col items-center justify-center p-2 text-slate-400 font-semibold transition-all';
-          }
-        });
-      },
-      openSettingsTab() {
-        if (!state.isAdminLoggedIn) {
-          openLoginModal();
-          return;
-        }
-        this.switchTab('settings');
-      },
-      handleTopManageClick() {
-        if (state.isAdminLoggedIn) {
-          this.switchTab('manage');
-        } else {
-          openLoginModal();
-        }
-      },
-      handleNavManageClick() {
-        if (state.isAdminLoggedIn) {
-          this.switchTab('manage');
-        } else {
-          this.switchTab('microsite');
-          showToast("Menu Atur Waktu khusus Admin.", "info");
-        }
-      },
-      handleNavSettingsClick() {
-        if (state.isAdminLoggedIn) {
-          this.switchTab('settings');
-        } else {
-          openLoginModal();
-        }
-      },
-      async handleAuthClick() {
-        if (state.isAdminLoggedIn) {
-          if (confirm("Keluar dari akun Admin?")) {
-            if (isFirebaseReady && auth) {
-              await signOut(auth);
-            }
-            state.isAdminLoggedIn = false;
-            renderAll();
-            this.switchTab('microsite');
-            showToast("Berhasil keluar dari sesi Admin.", "info");
-          }
-        } else {
-          openLoginModal();
-        }
-      },
-      setCategory(cat) {
-        state.selectedCategory = cat;
-        document.querySelectorAll('.cat-pill').forEach(b => {
-          const match = b.getAttribute('data-cat') === cat;
-          b.className = match
-            ? 'cat-pill px-3 py-1.5 rounded-xl text-[11px] font-extrabold whitespace-nowrap transition-all bg-slate-900 text-white shadow-sm'
-            : 'cat-pill px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all bg-white text-slate-600 border border-slate-200';
-        });
-        renderGrid();
-      },
       filterInstruments() {
-        state.searchQuery = document.getElementById('search-instrument').value;
-        renderGrid();
-      },
-      shakeAndOpen,
-      async applyBulkTime() {
-        if (!state.isAdminLoggedIn) {
-          showToast("Akses ditolak.", "error");
-          return;
-        }
-        const bulkTime = document.getElementById('bulk-open-time').value;
-        if (!bulkTime) {
-          showToast("Pilih waktu buka massal terlebih dahulu.", "warning");
-          return;
-        }
-        state.instruments.forEach(item => {
-          item.openTime = bulkTime;
-        });
-        await saveToFirestore();
-        renderAll();
-        showToast("Jadwal buka akses massal berhasil diterapkan untuk semua instrumen!", "success");
-      },
-      async submitSingleLink(e) {
-        e.preventDefault();
-        if (!state.isAdminLoggedIn) {
-          showToast("Akses ditolak.", "error");
-          return;
-        }
-        const no = Number(document.getElementById('modal-instrument-no').value);
-        const url = document.getElementById('modal-instrument-url').value.trim();
-        const openTime = document.getElementById('modal-instrument-time').value;
-        const idx = state.instruments.findIndex(i => i.no === no);
-        if (idx !== -1) {
-          state.instruments[idx].driveUrl = url;
-          state.instruments[idx].openTime = openTime;
-          await saveToFirestore();
-          renderAll();
-          closeEditModal();
-          showToast(`Tautan & Jadwal No. ${no} berhasil disimpan!`, 'success');
-        }
-      },
-      async saveRow(no) {
-        if (!state.isAdminLoggedIn) {
-          showToast("Akses ditolak. Login Admin diperlukan.", "error");
-          return;
-        }
-        const urlInput = document.getElementById(`manage-url-${no}`);
-        const timeInput = document.getElementById(`manage-time-${no}`);
-        if (!urlInput || !timeInput) return;
-        const idx = state.instruments.findIndex(i => i.no === no);
-        if (idx !== -1) {
-          state.instruments[idx].driveUrl = urlInput.value.trim();
-          state.instruments[idx].openTime = timeInput.value;
-          await saveToFirestore();
-          renderAll();
-          showToast(`Tautan No. ${no} diperbarui!`, 'success');
-        }
-      },
-      async savePortalSettings(e) {
-        e.preventDefault();
-        if (!state.isAdminLoggedIn) {
-          showToast("Akses ditolak.", "error");
-          return;
-        }
-        state.portalConfig.teacherName = document.getElementById('set-teacher-name').value;
-        state.portalConfig.teacherRole = document.getElementById('set-teacher-role-input').value;
-        state.portalConfig.schoolName = document.getElementById('set-school-name').value;
-        state.portalConfig.photoUrl = document.getElementById('set-photo-url').value.trim();
-        state.portalConfig.logoUrl = document.getElementById('set-logo-url').value.trim();
-        state.portalConfig.whatsappNumber = document.getElementById('set-wa-number').value.trim() || "6281234567890";
-        
-        await saveToFirestore();
-        renderAll();
-        showToast("Identitas profil portal berhasil diperbarui!", "success");
-        this.switchTab('microsite');
-      },
-      async handleLogin(e) {
-        e.preventDefault();
-        const email = document.getElementById('login-email').value.trim();
-        const password = document.getElementById('login-password').value.trim();
+        this.render();
+      }
 
-        if (!isFirebaseReady) {
-          showToast("Firebase belum dikonfigurasi.", "error");
+      handleAuthClick() {
+        if (this.currentUser && !this.currentUser.isAnonymous) {
+          if (confirm("Apakah Anda ingin keluar dari sesi Admin?")) {
+            if (!IS_PREVIEW) {
+              signOut(auth);
+            } else {
+              this.currentUser = null;
+            }
+            this.setupUI();
+          }
+        } else {
+          document.getElementById('auth-modal').classList.remove('hidden');
+        }
+      }
+
+      closeAuthModal() {
+        document.getElementById('auth-modal').classList.add('hidden');
+        document.getElementById('auth-error-msg').classList.add('hidden');
+      }
+
+      async executeLogin() {
+        const email = document.getElementById('auth-email').value.trim();
+        const pass = document.getElementById('auth-password').value.trim();
+        const errEl = document.getElementById('auth-error-msg');
+
+        if (!email || !pass) {
+          errEl.innerText = "Email dan password wajib diisi.";
+          errEl.classList.remove('hidden');
+          return;
+        }
+
+        if (IS_PREVIEW) {
+          // Demo Admin Login in Preview Mode
+          if (email === "admin@sekolah.sch.id" && pass === "admin123") {
+            this.currentUser = { uid: "demo-admin", email: email, isAnonymous: false };
+            this.closeAuthModal();
+            this.setupUI();
+            alert("Berhasil masuk sebagai Admin (Mode Preview)!");
+          } else {
+            errEl.innerText = "Email atau password demo salah. Gunakan admin@sekolah.sch.id / admin123";
+            errEl.classList.remove('hidden');
+          }
           return;
         }
 
         try {
-          await signInWithEmailAndPassword(auth, email, password);
-          state.isAdminLoggedIn = true;
-          closeLoginModal();
-          renderAll();
-          showToast("Berhasil masuk sebagai Admin via Firebase!", "success");
-        } catch (error) {
-          showToast("Autentikasi gagal: " + error.message, "error");
+          await signInWithEmailAndPassword(auth, email, pass);
+          this.closeAuthModal();
+          this.setupUI();
+        } catch(e) {
+          errEl.innerText = "Autentikasi gagal: " + e.message;
+          errEl.classList.remove('hidden');
         }
-      },
-      closeLoginModal,
-      closeEditModal
+      }
+
+      handleTopManageClick() {
+        this.switchView('settings');
+      }
+
+      switchView(viewName) {
+        this.currentView = viewName;
+        const micrositeView = document.getElementById('view-microsite');
+        const settingsView = document.getElementById('view-settings');
+        const btnHome = document.getElementById('nav-btn-home');
+        const btnSettings = document.getElementById('nav-btn-settings');
+
+        if (viewName === 'settings') {
+          micrositeView.classList.add('hidden');
+          settingsView.classList.remove('hidden');
+          btnSettings.className = "flex flex-col items-center gap-1 text-slate-900 font-extrabold transition-all";
+          btnHome.className = "flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-bold transition-all";
+          this.populateSettingsForm();
+        } else {
+          settingsView.classList.add('hidden');
+          micrositeView.classList.remove('hidden');
+          btnHome.className = "flex flex-col items-center gap-1 text-slate-900 font-extrabold transition-all";
+          btnSettings.className = "flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-bold transition-all";
+        }
+        lucide.createIcons();
+      }
+
+      populateSettingsForm() {
+        document.getElementById('input-profile-photo').value = this.profilePhoto;
+        const listEl = document.getElementById('admin-instruments-edit-list');
+        listEl.innerHTML = '';
+
+        this.instruments.forEach((item, index) => {
+          const row = document.createElement('div');
+          row.className = "p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2";
+          row.innerHTML = `
+            <div class="flex items-center justify-between text-xs font-extrabold text-slate-800">
+              <span>No. ${item.no}: ${item.title}</span>
+            </div>
+            <div class="space-y-1.5">
+              <input type="text" id="edit-url-${index}" value="${item.driveUrl || ''}" placeholder="https://drive.google.com/..." class="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-slate-900 font-medium" />
+              <input type="datetime-local" id="edit-time-${index}" value="${item.unlockTime || ''}" class="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 focus:outline-none focus:border-slate-900" />
+            </div>
+          `;
+          listEl.appendChild(row);
+        });
+      }
+
+      async applyGlobalUnlockTime() {
+        const timeVal = document.getElementById('global-unlock-time').value;
+        if (!timeVal) {
+          alert("Pilih waktu buka terlebih dahulu.");
+          return;
+        }
+
+        this.instruments.forEach(item => {
+          item.unlockTime = timeVal;
+        });
+
+        await this.persistData();
+        alert("Waktu buka massal berhasil diterapkan ke seluruh 29 instrumen!");
+        this.populateSettingsForm();
+      }
+
+      async saveProfilePhoto() {
+        const val = document.getElementById('input-profile-photo').value.trim();
+        if (val) {
+          this.profilePhoto = val;
+          await this.persistData();
+          const photoEl = document.getElementById('teacher-profile-photo');
+          if (photoEl) photoEl.src = this.profilePhoto;
+          alert("Foto profil berhasil diperbarui!");
+        }
+      }
+
+      async saveAllDriveLinks() {
+        this.instruments.forEach((item, index) => {
+          const urlInput = document.getElementById(`edit-url-${index}`);
+          const timeInput = document.getElementById(`edit-time-${index}`);
+          if (urlInput) item.driveUrl = urlInput.value.trim();
+          if (timeInput) item.unlockTime = timeInput.value;
+        });
+
+        await this.persistData();
+        alert("Semua tautan Google Drive berhasil disimpan!");
+        this.switchView('microsite');
+      }
+
+      async persistData() {
+        if (IS_PREVIEW) {
+          localStorage.setItem('smpn3_portal_data', JSON.stringify({
+            instruments: this.instruments,
+            profilePhoto: this.profilePhoto
+          }));
+          return;
+        }
+
+        try {
+          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_state');
+          await setDoc(docRef, {
+            instruments: this.instruments,
+            profilePhoto: this.profilePhoto
+          }, { merge: true });
+        } catch(e) {
+          console.error("Save error:", e);
+        }
+      }
+    }
+
+    const appInstance = new PortalApp();
+    window.app = {
+      filterInstruments: () => appInstance.filterInstruments(),
+      handleAuthClick: () => appInstance.handleAuthClick(),
+      closeAuthModal: () => appInstance.closeAuthModal(),
+      executeLogin: () => appInstance.executeLogin(),
+      handleTopManageClick: () => appInstance.handleTopManageClick(),
+      switchView: (v) => appInstance.switchView(v),
+      applyGlobalUnlockTime: () => appInstance.applyGlobalUnlockTime(),
+      saveProfilePhoto: () => appInstance.saveProfilePhoto(),
+      saveAllDriveLinks: () => appInstance.saveAllDriveLinks(),
+      openSettingsTab: () => appInstance.switchView('settings')
     };
 
-    window.addEventListener('DOMContentLoaded', initApp);
+    window.onload = () => {
+      lucide.createIcons();
+    };
   </script>
 </body>
 </html>
