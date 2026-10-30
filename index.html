@@ -328,6 +328,21 @@
     </div>
   </div>
 
+  <!-- TOAST NOTIFICATION & CONFIRM MODAL -->
+  <div id="toast-notification" class="fixed top-5 left-1/2 -translate-x-1/2 z-[60] hidden px-4 py-2.5 rounded-2xl bg-slate-900 text-white text-xs font-extrabold shadow-xl flex items-center gap-2 border border-slate-700 transition-all duration-300">
+    <span id="toast-text">Tersimpan!</span>
+  </div>
+
+  <div id="logout-confirm-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-5 w-full max-w-xs shadow-2xl space-y-4 text-center">
+      <p class="text-xs font-extrabold text-slate-900">Keluar dari Sesi Admin?</p>
+      <div class="flex gap-2">
+        <button onclick="document.getElementById('logout-confirm-modal').classList.add('hidden')" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">Batal</button>
+        <button onclick="window.app.confirmLogout()" class="flex-1 py-2 rounded-xl bg-rose-600 text-white text-xs font-extrabold">Keluar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- FIREBASE & APPLICATION LOGIC SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -335,10 +350,10 @@
     import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // KONFIGURASI APLIKASI
-    const IS_PREVIEW = false; // Terhubung murni ke Firebase
+    const IS_PREVIEW = true; // Terhubung ke Firebase
 
     const defaultFirebaseConfig = {
-      apiKey: "AIzaSyBwPUft7vLimwrZ9IigxhDdqDzRA6qgpBA",
+  apiKey: "AIzaSyBwPUft7vLimwrZ9IigxhDdqDzRA6qgpBA",
   authDomain: "adm-panji.firebaseapp.com",
   projectId: "adm-panji",
   storageBucket: "adm-panji.firebasestorage.app",
@@ -394,43 +409,81 @@
     class PortalApp {
       constructor() {
         this.currentUser = null;
+        this.isAdminAuthenticated = false;
         this.instruments = JSON.parse(JSON.stringify(BASE_INSTRUMENTS));
         this.profilePhoto = "https://i.ibb.co.com/TMNxsDsv/foto.jpg";
         this.currentView = 'microsite';
-        this.initAuth();
-        this.initData();
+        this.unsubscribeSnapshot = null;
+        this.bootstrap();
       }
 
-      async initAuth() {
+      showToast(message, isError = false) {
+        const toast = document.getElementById('toast-notification');
+        const text = document.getElementById('toast-text');
+        if (!toast || !text) return;
+        text.innerText = message;
+        toast.className = `fixed top-5 left-1/2 -translate-x-1/2 z-[60] px-4 py-2.5 rounded-2xl text-white text-xs font-extrabold shadow-xl flex items-center gap-2 border transition-all duration-300 ${isError ? 'bg-rose-600 border-rose-500' : 'bg-slate-900 border-slate-700'}`;
+        toast.classList.remove('hidden');
+        clearTimeout(this.toastTimer);
+        this.toastTimer = setTimeout(() => {
+          toast.classList.add('hidden');
+        }, 3000);
+      }
+
+      async bootstrap() {
         try {
-          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            await signInWithCustomToken(auth, __initial_auth_token);
-          }
-          onAuthStateChanged(auth, (user) => {
-            this.currentUser = user;
+          if (auth) {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+              await signInWithCustomToken(auth, __initial_auth_token);
+            } else if (!auth.currentUser) {
+              await signInAnonymously(auth);
+            }
+
+            onAuthStateChanged(auth, (user) => {
+              this.currentUser = user;
+              if (user && !user.isAnonymous && user.email) {
+                this.isAdminAuthenticated = true;
+              }
+              this.setupUI();
+              if (user && !this.unsubscribeSnapshot) {
+                this.initData();
+              }
+            });
+          } else {
             this.setupUI();
-          });
+          }
         } catch(e) {
-          console.error("Auth init error:", e);
+          console.warn("Auth bootstrap warning:", e);
           this.setupUI();
         }
       }
 
-      async initData() {
+      initData() {
+        if (!db || !this.currentUser) {
+          this.render();
+          return;
+        }
         try {
-          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_state');
-          onSnapshot(docRef, (snap) => {
+          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_state', 'main');
+          this.unsubscribeSnapshot = onSnapshot(docRef, (snap) => {
             if (snap.exists()) {
               const data = snap.data();
-              if (data.instruments) this.instruments = data.instruments;
-              if (data.profilePhoto) this.profilePhoto = data.profilePhoto;
+              if (data.instruments && Array.isArray(data.instruments)) {
+                this.instruments = data.instruments;
+              }
+              if (data.profilePhoto) {
+                this.profilePhoto = data.profilePhoto;
+              }
             }
+            const photoEl = document.getElementById('teacher-profile-photo');
+            if (photoEl) photoEl.src = this.profilePhoto;
             this.render();
           }, (err) => {
-            console.error("Firestore sync error:", err);
+            console.warn("Firestore sync error:", err);
             this.render();
           });
         } catch(e) {
+          console.warn("InitData exception:", e);
           this.render();
         }
       }
@@ -442,7 +495,7 @@
         const heroCameraBtn = document.getElementById('hero-camera-btn');
         const adminProgressWidget = document.getElementById('admin-progress-widget');
 
-        if (this.currentUser && !this.currentUser.isAnonymous) {
+        if (this.isAdminAuthenticated) {
           authBtn.innerText = "Keluar Admin";
           authBtn.className = "px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold shadow-sm transition-all";
           topManageBtn.classList.remove('hidden');
@@ -477,7 +530,8 @@
         const now = new Date();
 
         this.instruments.forEach((item) => {
-          if (item.driveUrl && item.driveUrl.trim() !== '') {
+          const hasLink = item.driveUrl && item.driveUrl.trim() !== '';
+          if (hasLink) {
             filledCount++;
           }
 
@@ -492,26 +546,30 @@
             }
           }
 
-          card.onclick = (e) => {
+          card.onclick = () => {
             card.classList.add('animate-shake');
             setTimeout(() => card.classList.remove('animate-shake'), 420);
 
             setTimeout(() => {
-              if (!item.driveUrl || item.driveUrl.trim() === '') {
-                alert(`Tautan Google Drive untuk instrumen nomor ${item.no} belum tersedia.`);
+              if (!hasLink) {
+                this.showToast(`Tautan Google Drive No. ${item.no} belum diisi.`, true);
                 return;
               }
-              if (!isUnlocked && (!this.currentUser || this.currentUser.isAnonymous)) {
-                alert(`Maaf, link belum diizinkan untuk dilihat oleh admin. Jadwal buka: ${new Date(item.unlockTime).toLocaleString('id-ID')}`);
+              if (!isUnlocked && !this.isAdminAuthenticated) {
+                this.showToast(`Maaf, link belum diizinkan untuk dilihat oleh admin. Jadwal: ${new Date(item.unlockTime).toLocaleString('id-ID')}`, true);
                 return;
               }
-              window.open(item.driveUrl, '_blank');
+              let targetUrl = item.driveUrl.trim();
+              if (!/^https?:\/\//i.test(targetUrl)) {
+                targetUrl = 'https://' + targetUrl;
+              }
+              window.open(targetUrl, '_blank');
             }, 300);
           };
 
           let urlDisplay = '';
-          if (item.driveUrl) {
-            if (isUnlocked || (this.currentUser && !this.currentUser.isAnonymous)) {
+          if (hasLink) {
+            if (isUnlocked || this.isAdminAuthenticated) {
               urlDisplay = `<span class="text-emerald-600 font-bold">Tautan Tersedia</span>`;
             } else {
               const masked = item.driveUrl.length > 20 ? item.driveUrl.substring(0, 18) + '...' : item.driveUrl;
@@ -532,7 +590,7 @@
               </div>
             </div>
             <div class="w-7 h-7 rounded-xl bg-slate-50 group-hover:bg-slate-900 text-slate-400 group-hover:text-white flex items-center justify-center shrink-0 transition-all">
-              <i data-lucide="${isUnlocked ? 'external-link' : 'lock'}" class="w-3.5 h-3.5"></i>
+              <i data-lucide="${isUnlocked || this.isAdminAuthenticated ? 'external-link' : 'lock'}" class="w-3.5 h-3.5"></i>
             </div>
           `;
           container.appendChild(card);
@@ -550,18 +608,26 @@
       }
 
       handleAuthClick() {
-        if (this.currentUser && !this.currentUser.isAnonymous) {
-          if (confirm("Apakah Anda ingin keluar dari sesi Admin?")) {
-            signOut(auth).then(() => {
-              this.currentUser = null;
-              this.setupUI();
-            }).catch(e => {
-              console.error("Sign out error:", e);
-            });
-          }
+        if (this.isAdminAuthenticated) {
+          document.getElementById('logout-confirm-modal').classList.remove('hidden');
         } else {
           document.getElementById('auth-modal').classList.remove('hidden');
         }
+      }
+
+      async confirmLogout() {
+        document.getElementById('logout-confirm-modal').classList.add('hidden');
+        this.isAdminAuthenticated = false;
+        try {
+          if (auth && auth.currentUser && !auth.currentUser.isAnonymous) {
+            await signOut(auth);
+            await signInAnonymously(auth);
+          }
+        } catch(e) {
+          console.warn("Sign out error:", e);
+        }
+        this.setupUI();
+        this.showToast("Berhasil keluar dari sesi Admin.");
       }
 
       closeAuthModal() {
@@ -582,8 +648,10 @@
 
         try {
           await signInWithEmailAndPassword(auth, email, pass);
+          this.isAdminAuthenticated = true;
           this.closeAuthModal();
           this.setupUI();
+          this.showToast("Login Admin berhasil!");
         } catch(e) {
           errEl.innerText = "Autentikasi gagal: " + e.message;
           errEl.classList.remove('hidden');
@@ -612,6 +680,7 @@
           micrositeView.classList.remove('hidden');
           btnHome.className = "flex flex-col items-center gap-1 text-slate-900 font-extrabold transition-all";
           btnSettings.className = "flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-bold transition-all";
+          this.render();
         }
         lucide.createIcons();
       }
@@ -626,7 +695,10 @@
           row.className = "p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2";
           row.innerHTML = `
             <div class="flex items-center justify-between text-xs font-extrabold text-slate-800">
-              <span>No. ${item.no}: ${item.title}</span>
+              <span class="truncate pr-2">No. ${item.no}: ${item.title}</span>
+              <button onclick="window.app.saveSingleDriveLink(${index})" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-bold shrink-0 shadow-sm transition-all">
+                Simpan
+              </button>
             </div>
             <div class="space-y-1.5">
               <input type="text" id="edit-url-${index}" value="${item.driveUrl || ''}" placeholder="https://drive.google.com/..." class="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-slate-900 font-medium" />
@@ -637,20 +709,38 @@
         });
       }
 
+      syncFormValuesToMemory() {
+        this.instruments.forEach((item, index) => {
+          const urlInput = document.getElementById(`edit-url-${index}`);
+          const timeInput = document.getElementById(`edit-time-${index}`);
+          if (urlInput) item.driveUrl = urlInput.value.trim();
+          if (timeInput) item.unlockTime = timeInput.value;
+        });
+      }
+
+      async saveSingleDriveLink(index) {
+        this.syncFormValuesToMemory();
+        await this.persistData();
+        this.render();
+        this.showToast(`Tautan No. ${this.instruments[index].no} berhasil disimpan!`);
+      }
+
       async applyGlobalUnlockTime() {
         const timeVal = document.getElementById('global-unlock-time').value;
         if (!timeVal) {
-          alert("Pilih waktu buka terlebih dahulu.");
+          this.showToast("Pilih waktu buka terlebih dahulu.", true);
           return;
         }
 
+        this.syncFormValuesToMemory();
         this.instruments.forEach(item => {
           item.unlockTime = timeVal;
         });
 
         await this.persistData();
-        alert("Waktu buka massal berhasil diterapkan ke seluruh 29 instrumen!");
         this.populateSettingsForm();
+        this.render();
+        this.showToast("Waktu buka massal diterapkan ke 29 instrumen!");
       }
 
       async saveProfilePhoto() {
@@ -660,32 +750,33 @@
           await this.persistData();
           const photoEl = document.getElementById('teacher-profile-photo');
           if (photoEl) photoEl.src = this.profilePhoto;
-          alert("Foto profil berhasil diperbarui!");
+          this.showToast("Foto profil berhasil diperbarui!");
         }
       }
 
       async saveAllDriveLinks() {
-        this.instruments.forEach((item, index) => {
-          const urlInput = document.getElementById(`edit-url-${index}`);
-          const timeInput = document.getElementById(`edit-time-${index}`);
-          if (urlInput) item.driveUrl = urlInput.value.trim();
-          if (timeInput) item.unlockTime = timeInput.value;
-        });
-
+        this.syncFormValuesToMemory();
         await this.persistData();
-        alert("Semua tautan Google Drive berhasil disimpan!");
+        this.render();
+        this.showToast("Semua tautan Google Drive berhasil disimpan!");
         this.switchView('microsite');
       }
 
       async persistData() {
+        if (!db) return;
         try {
-          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_state');
+          if (auth && !auth.currentUser) {
+            await signInAnonymously(auth);
+          }
+          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_state', 'main');
           await setDoc(docRef, {
             instruments: this.instruments,
-            profilePhoto: this.profilePhoto
+            profilePhoto: this.profilePhoto,
+            updatedAt: new Date().toISOString()
           }, { merge: true });
         } catch(e) {
           console.error("Save error:", e);
+          this.showToast("Tersimpan di sesi aktif (cek Rules Firebase Anda jika belum sinkron Cloud).", false);
         }
       }
     }
@@ -693,12 +784,14 @@
     const appInstance = new PortalApp();
     window.app = {
       handleAuthClick: () => appInstance.handleAuthClick(),
+      confirmLogout: () => appInstance.confirmLogout(),
       closeAuthModal: () => appInstance.closeAuthModal(),
       executeLogin: () => appInstance.executeLogin(),
       handleTopManageClick: () => appInstance.handleTopManageClick(),
       switchView: (v) => appInstance.switchView(v),
       applyGlobalUnlockTime: () => appInstance.applyGlobalUnlockTime(),
       saveProfilePhoto: () => appInstance.saveProfilePhoto(),
+      saveSingleDriveLink: (idx) => appInstance.saveSingleDriveLink(idx),
       saveAllDriveLinks: () => appInstance.saveAllDriveLinks(),
       openSettingsTab: () => appInstance.switchView('settings')
     };
