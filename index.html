@@ -353,7 +353,7 @@
     const IS_PREVIEW = false; // Terhubung ke Firebase
 
     const defaultFirebaseConfig = {
-  apiKey: "AIzaSyBwPUft7vLimwrZ9IigxhDdqDzRA6qgpBA",
+    apiKey: "AIzaSyBwPUft7vLimwrZ9IigxhDdqDzRA6qgpBA",
   authDomain: "adm-panji.firebaseapp.com",
   projectId: "adm-panji",
   storageBucket: "adm-panji.firebasestorage.app",
@@ -431,24 +431,24 @@
       }
 
       async bootstrap() {
+        // Langsung muat data dari Firestore saat halaman dibuka/di-refresh tanpa menunggu auth
+        this.initData();
+
         try {
           if (auth) {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-              await signInWithCustomToken(auth, __initial_auth_token);
-            } else if (!auth.currentUser) {
-              await signInAnonymously(auth);
-            }
-
             onAuthStateChanged(auth, (user) => {
               this.currentUser = user;
               if (user && !user.isAnonymous && user.email) {
                 this.isAdminAuthenticated = true;
+              } else {
+                this.isAdminAuthenticated = false;
               }
               this.setupUI();
-              if (user && !this.unsubscribeSnapshot) {
-                this.initData();
-              }
             });
+
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+              await signInWithCustomToken(auth, __initial_auth_token);
+            }
           } else {
             this.setupUI();
           }
@@ -458,25 +458,30 @@
         }
       }
 
-      initData() {
-        if (!db || !this.currentUser) {
+      async initData() {
+        if (!db) {
           this.render();
           return;
         }
         try {
           const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_state', 'main');
+
+          // Ambil data awal segera saat halaman di-refresh
+          try {
+            const initialSnap = await getDoc(docRef);
+            if (initialSnap.exists()) {
+              this.applyRemoteData(initialSnap.data());
+            }
+          } catch (readErr) {
+            console.warn("Initial getDoc warning:", readErr);
+          }
+
+          // Pantau perubahan data secara real-time
+          if (this.unsubscribeSnapshot) this.unsubscribeSnapshot();
           this.unsubscribeSnapshot = onSnapshot(docRef, (snap) => {
             if (snap.exists()) {
-              const data = snap.data();
-              if (data.instruments && Array.isArray(data.instruments)) {
-                this.instruments = data.instruments;
-              }
-              if (data.profilePhoto) {
-                this.profilePhoto = data.profilePhoto;
-              }
+              this.applyRemoteData(snap.data());
             }
-            const photoEl = document.getElementById('teacher-profile-photo');
-            if (photoEl) photoEl.src = this.profilePhoto;
             this.render();
           }, (err) => {
             console.warn("Firestore sync error:", err);
@@ -485,6 +490,30 @@
         } catch(e) {
           console.warn("InitData exception:", e);
           this.render();
+        }
+      }
+
+      applyRemoteData(data) {
+        if (!data) return;
+        if (data.instruments && Array.isArray(data.instruments)) {
+          this.instruments = BASE_INSTRUMENTS.map((baseItem, idx) => {
+            const found = data.instruments.find(i => Number(i.no) === Number(baseItem.no)) || data.instruments[idx];
+            return found ? {
+              no: baseItem.no,
+              title: baseItem.title,
+              driveUrl: found.driveUrl || "",
+              unlockTime: found.unlockTime || ""
+            } : baseItem;
+          });
+        }
+        if (data.profilePhoto) {
+          this.profilePhoto = data.profilePhoto;
+        }
+        const photoEl = document.getElementById('teacher-profile-photo');
+        if (photoEl) photoEl.src = this.profilePhoto;
+
+        if (this.currentView === 'settings') {
+          this.populateSettingsForm();
         }
       }
 
@@ -619,9 +648,8 @@
         document.getElementById('logout-confirm-modal').classList.add('hidden');
         this.isAdminAuthenticated = false;
         try {
-          if (auth && auth.currentUser && !auth.currentUser.isAnonymous) {
+          if (auth && auth.currentUser) {
             await signOut(auth);
-            await signInAnonymously(auth);
           }
         } catch(e) {
           console.warn("Sign out error:", e);
@@ -763,20 +791,23 @@
       }
 
       async persistData() {
-        if (!db) return;
+        if (!db) {
+          this.showToast("Database belum terhubung!", true);
+          return false;
+        }
         try {
-          if (auth && !auth.currentUser) {
-            await signInAnonymously(auth);
-          }
-          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_state', 'main');
-          await setDoc(docRef, {
+          const payload = {
             instruments: this.instruments,
             profilePhoto: this.profilePhoto,
             updatedAt: new Date().toISOString()
-          }, { merge: true });
+          };
+          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_state', 'main');
+          await setDoc(docRef, payload, { merge: true });
+          return true;
         } catch(e) {
           console.error("Save error:", e);
-          this.showToast("Tersimpan di sesi aktif (cek Rules Firebase Anda jika belum sinkron Cloud).", false);
+          this.showToast("Gagal menyimpan ke Firebase: Pastikan Anda sudah Login Admin & Rules Firestore sudah di-Publish.", true);
+          return false;
         }
       }
     }
