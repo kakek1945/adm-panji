@@ -353,7 +353,7 @@
     const IS_PREVIEW = false; // Terhubung ke Firebase
 
     const defaultFirebaseConfig = {
-    apiKey: "AIzaSyBwPUft7vLimwrZ9IigxhDdqDzRA6qgpBA",
+       apiKey: "AIzaSyBwPUft7vLimwrZ9IigxhDdqDzRA6qgpBA",
   authDomain: "adm-panji.firebaseapp.com",
   projectId: "adm-panji",
   storageBucket: "adm-panji.firebasestorage.app",
@@ -414,6 +414,7 @@
         this.profilePhoto = "https://i.ibb.co.com/TMNxsDsv/foto.jpg";
         this.currentView = 'microsite';
         this.unsubscribeSnapshot = null;
+        this.isInitialLoading = true;
         this.bootstrap();
       }
 
@@ -460,11 +461,15 @@
 
       async initData() {
         if (!db) {
+          this.isInitialLoading = false;
           this.render();
           return;
         }
         try {
           const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_state', 'main');
+
+          // Tampilkan state loading terlebih dahulu agar tidak flicker "Belum ada tautan"
+          this.render();
 
           // Ambil data awal segera saat halaman di-refresh
           try {
@@ -472,6 +477,8 @@
             if (initialSnap.exists()) {
               this.applyRemoteData(initialSnap.data());
             }
+            this.isInitialLoading = false;
+            this.render();
           } catch (readErr) {
             console.warn("Initial getDoc warning:", readErr);
           }
@@ -482,13 +489,16 @@
             if (snap.exists()) {
               this.applyRemoteData(snap.data());
             }
+            this.isInitialLoading = false;
             this.render();
           }, (err) => {
             console.warn("Firestore sync error:", err);
+            this.isInitialLoading = false;
             this.render();
           });
         } catch(e) {
           console.warn("InitData exception:", e);
+          this.isInitialLoading = false;
           this.render();
         }
       }
@@ -554,6 +564,25 @@
         if (!container) return;
 
         container.innerHTML = '';
+
+        if (this.isInitialLoading) {
+          for (let i = 0; i < 6; i++) {
+            const skel = document.createElement('div');
+            skel.className = "pin-card p-3.5 flex items-center justify-between gap-3 animate-pulse";
+            skel.innerHTML = `
+              <div class="flex items-center gap-3 w-full">
+                <div class="w-8 h-8 rounded-xl bg-slate-200 shrink-0"></div>
+                <div class="space-y-2 flex-1">
+                  <div class="h-3 bg-slate-200 rounded w-3/4"></div>
+                  <div class="h-2.5 bg-slate-100 rounded w-1/3"></div>
+                </div>
+              </div>
+              <div class="w-7 h-7 rounded-xl bg-slate-100 shrink-0"></div>
+            `;
+            container.appendChild(skel);
+          }
+          return;
+        }
 
         let filledCount = 0;
         const now = new Date();
